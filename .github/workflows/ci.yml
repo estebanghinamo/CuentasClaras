@@ -153,14 +153,16 @@ jobs:
         working-directory: frontend
         run: npx ng lint
 
-      # audit-level=high: quedan 3 vulnerabilidades moderadas sin fix en la
-      # linea 8.x, transitivas de @capacitor/cli -> xcode -> uuid. xcode solo
-      # aplica a compilar iOS, que este proyecto todavia no soporta (pending
-      # en PROJECT_STATE.json). Se aceptan moderate documentadas; high/critical
-      # siguen bloqueando el build.
+      # --omit=dev: solo se auditan las dependencias que se empaquetan en la
+      # app. Las devDependencies (karma, typescript-eslint, @capacitor/cli) no
+      # se distribuyen y hoy arrastran advisories sin fix publicado: braces
+      # 3.0.3 (ultima version) esta marcada como vulnerable, y @capacitor/cli
+      # -> xcode -> uuid (moderate, xcode solo aplica a compilar iOS, que el
+      # proyecto todavia no soporta). audit-level=high: high/critical en
+      # produccion siguen bloqueando el build.
       - name: Auditoria de dependencias (npm audit)
         working-directory: frontend
-        run: npm audit --audit-level=high
+        run: npm audit --omit=dev --audit-level=high
 
       - name: Correr tests unitarios (ng test, ChromeHeadless) con cobertura
         working-directory: frontend
