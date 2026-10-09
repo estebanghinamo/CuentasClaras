@@ -1,0 +1,65 @@
+// =============================================================================
+// Tema de Angular Material 20 (Material 3) alineado a los tokens --cc-*.
+//
+// ⚠️ NO está importado todavía desde styles.scss porque @angular/material no
+// está instalado. Pasos para activarlo (ver ESPECIFICACION_TECNICA.md §D.9):
+//
+//   1. cd frontend/ && npm install @angular/material@^20 @angular/cdk@^20
+//      (y luego `docker compose exec frontend npm install`, ver COMMANDS.md)
+//   2. npx ng generate @angular/material:theme-color \
+//        --primary-color=#1E3A8A --secondary-color=#B8892B \
+//        --tertiary-color=#2563EB --neutral-color=#64748B \
+//        --directory=src/styles/material
+//      → genera src/styles/material/_theme-colors.scss con $primary-palette, etc.
+//   3. En styles.scss descomentar la línea  @use 'material-theme';
+//   4. En app.config.ts agregar provideAnimationsAsync().
+// =============================================================================
+@use '@angular/material' as mat;
+@use 'material/theme-colors' as palette;
+
+html {
+  // theme-type: color-scheme → Material usa light-dark() y sigue el valor de
+  // `color-scheme` que ya setean los tokens (.dark-theme / prefers-color-scheme).
+  @include mat.theme((
+    color: (
+      primary: palette.$primary-palette,
+      tertiary: palette.$tertiary-palette,
+      theme-type: color-scheme,
+    ),
+    typography: (
+      plain-family: 'Inter',
+      brand-family: 'Inter',
+      bold-weight: 700,
+      medium-weight: 500,
+      regular-weight: 400,
+    ),
+    density: 0,
+  ));
+
+  // Ajustes de forma para que Material coincida con los radios de la marca
+  @include mat.card-overrides((
+    elevated-container-shape: var(--cc-radius-lg),
+    outlined-container-shape: var(--cc-radius-lg),
+  ));
+  @include mat.button-overrides((
+    filled-container-shape: var(--cc-radius-md),
+    outlined-container-shape: var(--cc-radius-md),
+    text-container-shape: var(--cc-radius-md),
+  ));
+  @include mat.dialog-overrides((
+    container-shape: var(--cc-radius-xl),
+  ));
+  @include mat.form-field-overrides((
+    outlined-container-shape: var(--cc-radius-md),
+  ));
+  @include mat.chips-overrides((
+    container-shape-radius: var(--cc-radius-full),
+  ));
+}
+
+// Densidad más compacta en desktop para tablas/listas densas
+@media (min-width: 960px) {
+  .cc-dense {
+    @include mat.theme((density: -2));
+  }
+}

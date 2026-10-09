@@ -1,0 +1,19 @@
+<h2 mat-dialog-title class="cc-confirm-dialog__title">
+  @if (data.icon) {
+    <span class="material-symbols-outlined" [class.cc-negative]="data.tone === 'danger'">{{ data.icon }}</span>
+  }
+  {{ data.title }}
+</h2>
+
+<mat-dialog-content class="cc-stack">
+  <p>{{ data.message }}</p>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  @if (data.cancelLabel) {
+    <button mat-stroked-button (click)="dialogRef.close(false)">{{ data.cancelLabel }}</button>
+  }
+  <button mat-flat-button [color]="data.tone === 'danger' ? 'warn' : 'primary'" (click)="dialogRef.close(true)">
+    {{ data.confirmLabel ?? 'Entendido' }}
+  </button>
+</mat-dialog-actions>

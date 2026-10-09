@@ -1,0 +1,67 @@
+# ARCHIVOS DE TRABAJO DE LA IA Y DOCUMENTACION INTERNA: repo publico, solo se
+# sube codigo fuente. Estos archivos quedan solo en el disco local.
+/CLAUDE.md
+/sistema.md
+/PROJECT_STATE.json
+/ARCHITECTURE_DECISIONS.md
+/TASK_CONTRACT_TEMPLATE.json
+/COMMANDS.md
+/FINALIZATION_PROTOCOL.md
+/ERROR_LOG.md
+/PRODUCTION_CHECKLIST.md
+/CalidadYSeguridad.md
+/ESPECIFICACION_TECNICA.md
+/agents/
+/skills/
+.claude/
+.github/modernize/
+
+# ENV / SECRETS
+.env
+.env.*
+!.env.example
+
+# FIREBASE / PUSH NOTIFICATIONS — credenciales reales, nunca se commitean
+frontend/android/app/google-services.json
+backend/storage/app/secrets/
+
+# NODE / ANGULAR
+node_modules/
+dist/
+.angular/
+.cache/
+coverage/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# PHP / LARAVEL
+vendor/
+storage/logs/*.log
+bootstrap/cache/*.php
+backend/storage/api-docs/
+
+# DATABASE LOCAL
+*.sqlite
+*.sqlite3
+*.db
+*.dump
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# SONARQUBE
+.scannerwork/
+.sonar/
+
+# TEMP
+tmp/
+temp/
+# Anclado a la raíz (con "/" adelante): sin esto, en Windows (core.ignorecase=true)
+# esta regla matcheaba también backend/app/**/Reports/ (namespace de PHP de M-14
+# en adelante, Controllers/Reports, Services/Reports, etc.) y los dejaba afuera
+# de git en silencio - ver ERROR_LOG.md.
+/reports/

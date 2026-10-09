@@ -1,0 +1,19 @@
+.connection-check {
+  font-family: system-ui, sans-serif;
+  padding: 2rem;
+  text-align: center;
+}
+.ok { color: #16a34a; }
+.error { color: #dc2626; }
+button {
+  margin-top: 1rem;
+  padding: 0.5rem 1.25rem;
+  font-size: 1rem;
+  cursor: pointer;
+}
+button:disabled { cursor: default; opacity: 0.6; }
+.api-url {
+  margin-top: 1.5rem;
+  font-size: 0.8rem;
+  color: #6b7280;
+}

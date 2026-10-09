@@ -1,0 +1,53 @@
+<section class="cc-page">
+  <header class="cc-page__header">
+    <div class="cc-page__title">
+      <h1 class="cc-h1">Ingresos</h1>
+    </div>
+    <div class="cc-page__actions">
+      <app-month-year-picker [year]="year()" [month]="month()" (periodChange)="goToPeriod($event)" />
+      @if (isCurrentMonth()) {
+        <button mat-flat-button color="primary" (click)="openForm(null)">Nuevo ingreso</button>
+      }
+    </div>
+  </header>
+
+  <div class="cc-card">
+    <div class="cc-stat">
+      <span class="cc-stat__label">Total del mes</span>
+      <span class="cc-stat__value">{{ total() | currency: context.membership()?.currency : 'symbol-narrow' : '1.2-2' }}</span>
+    </div>
+  </div>
+
+  <div class="cc-card">
+    @if (items().length === 0) {
+      <p>Sin ingresos cargados este mes.</p>
+    } @else {
+      <ul class="cc-row-list cc-zebra-list">
+        @for (entry of items(); track entry.id) {
+          <li class="cc-row-list__item">
+            <div class="cc-row-list__main">
+              <strong class="cc-row-list__amount">{{ entry.amount | currency: context.membership()?.currency : 'symbol-narrow' : '1.2-2' }}</strong>
+              <span class="cc-row-list__detail">{{ entry.concept }}</span>
+            </div>
+            <div class="cc-row-list__meta">
+              <span class="cc-caption">{{ entry.date }} · {{ entry.user_name }}</span>
+              @if (entry.source === 'closing') {
+                <span class="cc-row-list__actions">
+                  <button mat-stroked-button (click)="showClosingAllocationInfo()">
+                    <span class="material-symbols-outlined">info</span>
+                    Asignación de cierre
+                  </button>
+                </span>
+              } @else if (isCurrentMonth() && entry.can_edit) {
+                <span class="cc-row-list__actions">
+                  <button mat-stroked-button (click)="openForm(entry)">Editar</button>
+                  <button mat-stroked-button color="warn" (click)="delete(entry)">Eliminar</button>
+                </span>
+              }
+            </div>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+</section>

@@ -1,0 +1,26 @@
+<a class="cc-card cc-workspace-card" [routerLink]="['/w', workspace().id]">
+  <div class="cc-workspace-card__header">
+    <div class="cc-workspace-card__icon">
+      <span class="material-symbols-outlined">{{ typeIcon(workspace().type) }}</span>
+    </div>
+    <div class="cc-workspace-card__title">
+      <strong>{{ workspace().name }}</strong>
+      <span class="cc-caption">{{ typeLabel(workspace().type) }}</span>
+    </div>
+  </div>
+
+  <div class="cc-workspace-card__meta">
+    <span>{{ workspace().currency }}</span>
+    <span>{{ workspace().members_count }} {{ workspace().members_count === 1 ? 'miembro' : 'miembros' }}</span>
+    @if (showRole()) {
+      <span>{{ workspace().role === 'owner' ? 'Propietario' : 'Miembro' }}</span>
+    }
+  </div>
+
+  @if (canInvite()) {
+    <button mat-stroked-button type="button" class="cc-workspace-card__invite" (click)="onInvite($event)">
+      <span class="material-symbols-outlined">person_add</span>
+      Invitar miembros
+    </button>
+  }
+</a>

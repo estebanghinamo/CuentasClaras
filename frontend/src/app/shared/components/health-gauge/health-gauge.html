@@ -1,0 +1,64 @@
+<div class="cc-health-gauge">
+  <svg viewBox="0 0 200 110" class="cc-health-gauge__svg" aria-hidden="true">
+    <path class="cc-health-gauge__track" [attr.d]="arcPath" />
+    <path
+      class="cc-health-gauge__value"
+      [class.is-good]="level() === 'good'"
+      [class.is-warning]="level() === 'warning'"
+      [class.is-bad]="level() === 'bad'"
+      [attr.d]="arcPath"
+      [style.stroke-dasharray]="circumference"
+      [style.stroke-dashoffset]="dashOffset()"
+    />
+  </svg>
+
+  <div class="cc-health-gauge__center">
+    @if (score() !== null) {
+      <span class="cc-health-gauge__score">{{ score() }}</span>
+    } @else {
+      <span class="cc-health-gauge__score cc-health-gauge__score--empty">—</span>
+    }
+    <span class="cc-health-gauge__label">
+      {{ levelLabel() }}
+      <button
+        type="button"
+        class="cc-health-gauge__info"
+        matTooltip="Puntaje de 0 a 100 que combina 4 factores de tu salud financiera del mes: presupuestos, ahorro, puntualidad de pagos y carga de cuotas. 70+ es saludable, 40-69 requiere atención, menos de 40 es crítico."
+        aria-label="Qué significa este puntaje"
+      >
+        <span class="material-symbols-outlined">info</span>
+      </button>
+    </span>
+  </div>
+
+  @if (score() === null) {
+    <p class="cc-caption">Sin datos suficientes para calcular el puntaje este mes.</p>
+  } @else if (breakdown()) {
+    <button type="button" class="cc-health-gauge__toggle" (click)="toggle()">
+      {{ expanded() ? 'Ocultar detalle' : 'Ver detalle' }}
+    </button>
+    @if (expanded()) {
+      <ul class="cc-health-gauge__breakdown">
+        @for (row of breakdownRows(); track row.key) {
+          <li>
+            <div class="cc-health-gauge__breakdown-row">
+              <span class="cc-health-gauge__breakdown-title">
+                <strong>{{ row.label }}</strong>
+                <button
+                  type="button"
+                  class="cc-health-gauge__info"
+                  [matTooltip]="row.explanation"
+                  [attr.aria-label]="'Qué significa ' + row.label"
+                >
+                  <span class="material-symbols-outlined">info</span>
+                </button>
+              </span>
+              <span>{{ row.score }}/100 (peso {{ row.weight }}%)</span>
+            </div>
+            <p class="cc-caption">{{ row.detail }}</p>
+          </li>
+        }
+      </ul>
+    }
+  }
+</div>

@@ -1,0 +1,71 @@
+<h2 mat-dialog-title>Invitar a {{ data.workspaceName }}</h2>
+
+@if (results(); as items) {
+  <mat-dialog-content class="cc-stack">
+    <ul class="cc-stack cc-stack--sm cc-zebra-list">
+      @for (item of items; track item.email) {
+        <li class="cc-quick-invite__result">
+          <span
+            class="material-symbols-outlined"
+            [class.cc-negative]="!item.success"
+            [style.color]="item.success ? 'var(--cc-success)' : null"
+          >
+            {{ item.success ? 'check_circle' : 'error' }}
+          </span>
+          <span>
+            <strong>{{ item.email }}</strong>
+            @if (!item.success) {
+              <span class="cc-caption"> — {{ item.message }}</span>
+            }
+          </span>
+        </li>
+      }
+    </ul>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-flat-button color="primary" mat-dialog-close>Listo</button>
+  </mat-dialog-actions>
+} @else {
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <mat-dialog-content class="cc-stack">
+      <p class="cc-caption">
+        La persona invitada ya tiene que tener una cuenta creada en Cuentas Claras con ese email - no hace falta
+        que el correo llegue, le va a aparecer un aviso dentro de la app para aceptar.
+      </p>
+
+      @for (control of emails.controls; track $index) {
+        <div class="cc-quick-invite__row">
+          <mat-form-field class="cc-form__full" appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Email {{ $index + 1 }}</mat-label>
+            <input matInput type="email" [formControl]="control" />
+            @if (control.touched && control.invalid) {
+              <mat-error>Ingresá un email válido.</mat-error>
+            }
+          </mat-form-field>
+          @if (emails.length > 1) {
+            <button mat-icon-button type="button" (click)="removeEmail($index)" aria-label="Quitar email">
+              <span class="material-symbols-outlined">close</span>
+            </button>
+          }
+        </div>
+      }
+
+      <button mat-stroked-button type="button" (click)="addEmail()">
+        <span class="material-symbols-outlined">add</span>
+        Agregar otro email
+      </button>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+      <button mat-stroked-button type="button" mat-dialog-close>Cancelar</button>
+      <button mat-flat-button color="primary" type="submit" [disabled]="sending()">
+        @if (sending()) {
+          <app-spinner [size]="20" />
+        } @else {
+          Enviar invitaciones
+        }
+      </button>
+    </mat-dialog-actions>
+  </form>
+}

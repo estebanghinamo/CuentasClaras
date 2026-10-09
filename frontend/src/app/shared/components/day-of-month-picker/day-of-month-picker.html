@@ -1,0 +1,25 @@
+<mat-form-field appearance="outline">
+  <mat-label>{{ label() }}</mat-label>
+  <input matInput readonly [value]="dayLabel()" [matMenuTriggerFor]="menu" #menuTrigger="matMenuTrigger" />
+  <button matSuffix mat-icon-button type="button" (click)="menuTrigger.openMenu()" aria-label="Elegir día">
+    <span class="material-symbols-outlined">calendar_month</span>
+  </button>
+  @if (errorMessage(); as message) {
+    <mat-error>{{ message }}</mat-error>
+  }
+</mat-form-field>
+
+<mat-menu #menu="matMenu">
+  <div class="cc-stack cc-stack--sm" role="presentation" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+    @if (allowClear()) {
+      <button type="button" class="cc-day-grid__clear" (click)="selectDay(null); menuTrigger.closeMenu()">Sin día límite</button>
+    }
+    <div class="cc-day-grid">
+      @for (d of days; track d) {
+        <button type="button" class="cc-day-grid__day" [class.is-selected]="day() === d" (click)="selectDay(d); menuTrigger.closeMenu()">
+          {{ d }}
+        </button>
+      }
+    </div>
+  </div>
+</mat-menu>

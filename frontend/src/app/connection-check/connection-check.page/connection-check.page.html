@@ -1,0 +1,13 @@
+<main class="connection-check">
+  <h1>Cuentas Claras</h1>
+
+  <p [class.ok]="status().reachable" [class.error]="!status().reachable">
+    {{ checking() ? 'Probando conexión…' : status().detail }}
+  </p>
+
+  <button type="button" (click)="retry()" [disabled]="checking()">
+    {{ checking() ? 'Probando…' : 'Probar conexión de nuevo' }}
+  </button>
+
+  <p class="api-url">apiUrl: {{ apiUrl }}</p>
+</main>

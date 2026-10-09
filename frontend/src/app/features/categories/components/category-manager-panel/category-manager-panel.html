@@ -1,0 +1,36 @@
+<div class="cc-category-manager">
+  @if (categories().length === 0) {
+    <p class="cc-caption">Todavía no cargaste ninguna categoría.</p>
+  } @else {
+    <div class="cc-category-manager__grid">
+      @for (category of categories(); track category.id) {
+        <div class="cc-category-manager__card">
+          <div
+            class="cc-category-manager__icon"
+            [style.background]="softColor(category)"
+            [style.color]="category.color"
+          >
+            <span class="material-symbols-outlined">{{ category.icon }}</span>
+          </div>
+          <div class="cc-category-manager__info">
+            <strong>{{ category.name }}</strong>
+            <span class="cc-caption">{{ category.expenses_count }} {{ category.expenses_count === 1 ? 'gasto' : 'gastos' }}</span>
+          </div>
+          <span class="cc-category-manager__actions">
+            <button mat-icon-button type="button" aria-label="Editar categoría" matTooltip="Editar" (click)="openForm(category)">
+              <span class="material-symbols-outlined">edit</span>
+            </button>
+            <button mat-icon-button type="button" aria-label="Eliminar categoría" matTooltip="Eliminar" (click)="delete(category)">
+              <span class="material-symbols-outlined">delete</span>
+            </button>
+          </span>
+        </div>
+      }
+    </div>
+  }
+
+  <button mat-stroked-button color="primary" class="cc-category-manager__add" (click)="openForm(null)">
+    <span class="material-symbols-outlined">add</span>
+    Nueva categoría
+  </button>
+</div>

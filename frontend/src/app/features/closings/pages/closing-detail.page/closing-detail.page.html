@@ -1,0 +1,162 @@
+@if (closing(); as closing) {
+  <section class="cc-page">
+    <header class="cc-page__header">
+      <div class="cc-page__title">
+        <h1 class="cc-h1">{{ monthLabel() }}</h1>
+        <p class="cc-caption">
+          Cerrado el {{ closing.closed_at | date: 'dd/MM/yyyy' }}
+          @if (closing.health_score !== null) {
+            · Health score: {{ closing.health_score }}
+          }
+        </p>
+      </div>
+      @if (closing.allocation_status === 'pending') {
+        <button mat-flat-button color="primary" (click)="openAllocate()">Asignar sobrante</button>
+      }
+    </header>
+
+    @if (closing.allocation_status === 'not_applicable') {
+      <div class="cc-card cc-banner cc-banner--danger">
+        <span class="material-symbols-outlined">trending_down</span>
+        <span class="cc-banner__text">Cerraste el mes con déficit de {{ -closing.remaining_amount | number: '1.2-2' }}.</span>
+      </div>
+    }
+
+    <div class="cc-grid cc-grid--stats cc-dashboard-stats">
+      <div class="cc-card cc-stat cc-dashboard-stat cc-dashboard-stat--income">
+        <span class="cc-stat__label">Ingresos</span>
+        <span class="cc-stat__value">{{ closing.total_income | number: '1.2-2' }}</span>
+      </div>
+      <div class="cc-card cc-stat cc-dashboard-stat cc-dashboard-stat--paid-expenses">
+        <span class="cc-stat__label">Gastos</span>
+        <span class="cc-stat__value">{{ closing.total_expenses | number: '1.2-2' }}</span>
+      </div>
+      <div class="cc-card cc-stat cc-dashboard-stat cc-dashboard-stat--services">
+        <span class="cc-stat__label">Servicios</span>
+        <span class="cc-stat__value">{{ closing.total_services | number: '1.2-2' }}</span>
+      </div>
+      <div class="cc-card cc-stat cc-dashboard-stat cc-dashboard-stat--installments">
+        <span class="cc-stat__label">Cuotas</span>
+        <span class="cc-stat__value">{{ closing.total_installments | number: '1.2-2' }}</span>
+      </div>
+      <div class="cc-card cc-stat cc-dashboard-stat cc-dashboard-stat--available">
+        <span class="cc-stat__label">Sobrante</span>
+        <span class="cc-stat__value" [class.cc-negative]="closing.remaining_amount < 0">{{ closing.remaining_amount | number: '1.2-2' }}</span>
+      </div>
+      <div class="cc-card cc-stat cc-dashboard-stat cc-dashboard-stat--savings">
+        <span class="cc-stat__label">Asignado (monedero + metas + mes siguiente)</span>
+        <span class="cc-stat__value">
+          {{ closing.allocated_to_wallet + closing.allocated_to_goals + closing.allocated_to_next_month | number: '1.2-2' }}
+        </span>
+      </div>
+      <div class="cc-card cc-stat cc-dashboard-stat cc-dashboard-stat--unallocated">
+        <span class="cc-stat__label">Sin asignar</span>
+        <span class="cc-stat__value">{{ closing.unallocated_amount | number: '1.2-2' }}</span>
+      </div>
+    </div>
+
+    @if (closing.breakdown; as breakdown) {
+      <div class="cc-grid cc-grid--2">
+        <div class="cc-card">
+          <div class="cc-card__header">Gastos por categoría</div>
+          @if (breakdown.by_category.length === 0) {
+            <p>Sin gastos este mes.</p>
+          } @else {
+            <ul class="cc-stack cc-stack--sm cc-zebra-list">
+              @for (row of breakdown.by_category; track row.category_name) {
+                <li class="cc-category-list__row">
+                  <div class="cc-cluster">
+                    <span>{{ row.category_name }}</span>
+                    <span style="margin-left: auto">{{ row.amount | number: '1.2-2' }} ({{ row.pct }}%)</span>
+                  </div>
+                </li>
+              }
+            </ul>
+          }
+        </div>
+
+        <div class="cc-card">
+          <div class="cc-card__header">Por integrante</div>
+          @if (breakdown.by_user.length === 0) {
+            <p>Sin movimientos este mes.</p>
+          } @else {
+            <ul class="cc-stack cc-stack--sm cc-zebra-list">
+              @for (row of breakdown.by_user; track row.user_id) {
+                <li class="cc-member-list__row">
+                  <strong class="cc-member-list__name">{{ row.user_name }}</strong>
+                  <div class="cc-member-list__metrics">
+                    <div class="cc-member-list__metric">
+                      <span>Ingresos</span>
+                      <strong>{{ row.income | number: '1.2-2' }}</strong>
+                    </div>
+                    <div class="cc-member-list__metric">
+                      <span>Gastos</span>
+                      <strong>{{ row.expenses | number: '1.2-2' }}</strong>
+                    </div>
+                    <div class="cc-member-list__metric">
+                      <span>Cuotas</span>
+                      <strong>{{ row.installments | number: '1.2-2' }}</strong>
+                    </div>
+                  </div>
+                </li>
+              }
+            </ul>
+          }
+        </div>
+
+        <div class="cc-card">
+          <div class="cc-card__header">Servicios del mes</div>
+          @if (breakdown.services.length === 0) {
+            <p>Sin servicios este mes.</p>
+          } @else {
+            <ul class="cc-dashboard-breakdown-list cc-zebra-list">
+              @for (service of breakdown.services; track service.service_id) {
+                <li>
+                  <span>
+                    {{ service.name }}
+                    <small [class.cc-negative]="service.was_late">{{ service.was_late ? 'Con mora' : service.status }}</small>
+                  </span>
+                  <strong>{{ service.amount_paid ?? 0 | number: '1.2-2' }}</strong>
+                </li>
+              }
+            </ul>
+          }
+        </div>
+
+        <div class="cc-card">
+          <div class="cc-card__header">Cuotas del mes</div>
+          @if (breakdown.installments.length === 0) {
+            <p>Sin cuotas este mes.</p>
+          } @else {
+            <ul class="cc-dashboard-breakdown-list cc-zebra-list">
+              @for (installment of breakdown.installments; track installment.installment_id) {
+                <li>
+                  <span>{{ installment.description }} · Cuota {{ installment.number }} de {{ installment.installments_count }}</span>
+                  <strong>{{ installment.amount | number: '1.2-2' }}</strong>
+                </li>
+              }
+            </ul>
+          }
+        </div>
+
+        @if (breakdown.budgets.length > 0) {
+          <div class="cc-card">
+            <div class="cc-card__header">Presupuestos</div>
+            <ul class="cc-stack cc-stack--sm cc-zebra-list">
+              @for (budget of breakdown.budgets; track budget.category_id) {
+                <li class="cc-category-list__row">
+                  <div class="cc-cluster">
+                    <span>{{ budget.category_name }}</span>
+                    <span style="margin-left: auto">{{ budget.spent_amount | number: '1.2-2' }} / {{ budget.limit_amount | number: '1.2-2' }} ({{ budget.pct }}%)</span>
+                  </div>
+                </li>
+              }
+            </ul>
+          </div>
+        }
+      </div>
+
+      <p class="cc-caption">{{ breakdown.expenses_count }} gastos · {{ breakdown.income_entries_count }} ingresos registrados este mes.</p>
+    }
+  </section>
+}

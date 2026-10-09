@@ -1,0 +1,251 @@
+<section class="cc-page">
+  <header class="cc-page__header">
+    <div class="cc-page__title">
+      <h1 class="cc-h1">Dashboard</h1>
+    </div>
+    <div class="cc-page__actions">
+      <app-month-year-picker [year]="year()" [month]="month()" (periodChange)="goToPeriod($event)" />
+      <button mat-stroked-button (click)="exportAll()">Exportar todo</button>
+    </div>
+  </header>
+
+  <!-- Hero: el único número que importa de un vistazo. -->
+  <div class="cc-card cc-card--accent cc-dashboard-hero">
+    <span class="cc-dashboard-hero__label">Disponible este mes</span>
+    <span class="cc-dashboard-hero__value" [class.is-negative]="(dashboard()?.totals?.available ?? 0) < 0">
+      {{ dashboard()?.totals?.available ?? 0 | currency: dashboard()?.currency : 'symbol-narrow' : '1.2-2' }}
+    </span>
+
+    <div class="cc-dashboard-hero__meta">
+      @if (deltaLabel(dashboard()?.comparison?.income_delta_pct ?? null); as delta) {
+        <div class="cc-dashboard-hero__metric">
+          <span>Ingresos</span>
+          <span>{{ dashboard()?.totals?.income ?? 0 | currency: dashboard()?.currency : 'symbol-narrow' : '1.0-0' }}</span>
+        </div>
+      }
+      <div class="cc-dashboard-hero__metric">
+        <span>Gastado</span>
+        <span>{{ dashboard()?.totals?.expenses ?? 0 | currency: dashboard()?.currency : 'symbol-narrow' : '1.0-0' }}</span>
+      </div>
+      @if (dashboard()?.projection; as projection) {
+        <div class="cc-dashboard-hero__metric">
+          <span>Proyección fin de mes</span>
+          <span>{{ projection.projected_available | currency: dashboard()?.currency : 'symbol-narrow' : '1.0-0' }}</span>
+        </div>
+      }
+    </div>
+
+    @if (dashboard()?.projection; as projection) {
+      <p class="cc-caption" style="opacity: 0.85">
+        Llevás {{ projection.days_elapsed }} de {{ projection.days_in_month }} días — {{ trendLabel(projection.trend) }}
+      </p>
+    }
+  </div>
+
+  <!-- Totales secundarios: un vistazo compacto, no 9 tarjetas del mismo peso. -->
+  <div class="cc-dashboard-secondary">
+    <div class="cc-dashboard-chip">
+      <span class="cc-dashboard-chip__label">Gastos por categorías</span>
+      <span class="cc-dashboard-chip__value">{{ dashboard()?.totals?.category_expenses ?? 0 | currency: dashboard()?.currency : 'symbol-narrow' : '1.0-0' }}</span>
+    </div>
+    <div class="cc-dashboard-chip">
+      <span class="cc-dashboard-chip__label">Servicios pagados</span>
+      <span class="cc-dashboard-chip__value">{{ dashboard()?.totals?.services_paid ?? 0 | currency: dashboard()?.currency : 'symbol-narrow' : '1.0-0' }}</span>
+    </div>
+    <div class="cc-dashboard-chip" [class.cc-dashboard-chip--accent]="isInstallmentsFullyPaid()" style="--cc-dashboard-stat-color: var(--cc-success)">
+      <span class="cc-dashboard-chip__label">Cuotas pagadas / total</span>
+      <span class="cc-dashboard-chip__value">
+        {{ dashboard()?.totals?.installments_paid ?? 0 | currency: dashboard()?.currency : 'symbol-narrow' : '1.0-0' }}
+        / {{ dashboard()?.totals?.installments ?? 0 | currency: dashboard()?.currency : 'symbol-narrow' : '1.0-0' }}
+        @if (isInstallmentsFullyPaid()) {
+          <span class="material-symbols-outlined cc-dashboard-stat__check">check_circle</span>
+        }
+      </span>
+    </div>
+    <div class="cc-dashboard-chip">
+      <span class="cc-dashboard-chip__label">Depósitos de ahorro</span>
+      <span class="cc-dashboard-chip__value">{{ dashboard()?.totals?.savings_deposited ?? 0 | currency: dashboard()?.currency : 'symbol-narrow' : '1.0-0' }}</span>
+    </div>
+    <div class="cc-dashboard-chip">
+      <span class="cc-dashboard-chip__label">Aportes a metas</span>
+      <span class="cc-dashboard-chip__value">{{ dashboard()?.totals?.goals_contributed ?? 0 | currency: dashboard()?.currency : 'symbol-narrow' : '1.0-0' }}</span>
+    </div>
+  </div>
+
+  <!-- Salud financiera y evolución primero: da contexto antes que el detalle. -->
+  <div class="cc-grid cc-grid--2">
+    <div class="cc-card">
+      <div class="cc-card__header">Salud financiera</div>
+      <app-health-gauge
+        [score]="dashboard()?.health?.score ?? null"
+        [level]="dashboard()?.health?.level ?? null"
+        [breakdown]="dashboard()?.health?.breakdown ?? null"
+      />
+    </div>
+
+    <div class="cc-card">
+      <div class="cc-card__header">Evolución del disponible (últimos 12 meses)</div>
+      @if (historyLabels().length === 0) {
+        <p>Sin historial todavía.</p>
+      } @else {
+        <app-line-chart [labels]="historyLabels()" [data]="historyAvailable()" />
+      }
+    </div>
+  </div>
+
+  @if ((dashboard()?.overdue_services?.count ?? 0) > 0) {
+    <div class="cc-card cc-banner cc-banner--danger" style="flex-direction: column; align-items: stretch; gap: var(--cc-space-3)">
+      <div class="cc-cluster">
+        <span class="material-symbols-outlined">error</span>
+        <strong>{{ dashboard()?.overdue_services?.count }} servicio(s) vencido(s)</strong>
+      </div>
+      <ul class="cc-stack cc-stack--sm cc-overdue-list">
+        @for (item of dashboard()?.overdue_services?.items; track item.service_payment_id) {
+          <li class="cc-overdue-list__row">
+            <span>{{ item.service_name }}</span>
+            <span class="cc-overdue-list__detail">{{ item.amount | currency: dashboard()?.currency : 'symbol-narrow' : '1.2-2' }} — venció {{ item.due_date_end }}</span>
+          </li>
+        }
+      </ul>
+      <a mat-stroked-button [routerLink]="['/w', workspaceId, 'services']" style="align-self: flex-start">Ver en Servicios</a>
+    </div>
+  }
+
+  @if (dashboard()?.pending_allocation; as closing) {
+    <div class="cc-card cc-banner">
+      <span class="material-symbols-outlined">savings</span>
+      <span class="cc-banner__text">Tenés {{ closing.unallocated_amount | currency: dashboard()?.currency : 'symbol-narrow' : '1.2-2' }} sin asignar del cierre de {{ pendingClosingLabel() }}.</span>
+      <a mat-stroked-button [routerLink]="['/w', workspaceId, 'closings', closing.year, closing.month]">Asignar</a>
+    </div>
+  }
+
+  <div class="cc-grid cc-grid--2">
+    <div class="cc-card">
+      <div class="cc-card__header">Gastos por categorías</div>
+      @if ((dashboard()?.by_category?.length ?? 0) === 0) {
+        <p>Sin gastos este mes.</p>
+      } @else {
+        <ul class="cc-stack cc-stack--sm">
+          @for (row of visibleCategories(); track row.category_name) {
+            <li class="cc-category-list__row">
+              <div class="cc-cluster">
+                <span class="material-symbols-outlined" [style.color]="row.category_color">{{ row.category_icon }}</span>
+                <span>{{ row.category_name }}</span>
+                <span style="margin-left: auto">{{ row.amount | currency: dashboard()?.currency : 'symbol-narrow' : '1.2-2' }} ({{ row.pct }}%)</span>
+              </div>
+              <div style="height: 6px; background: var(--cc-divider); border-radius: 999px; overflow: hidden;">
+                <div [style.width.%]="row.pct" [style.background]="row.category_color" style="height: 100%;"></div>
+              </div>
+            </li>
+          }
+        </ul>
+        @if ((dashboard()?.by_category?.length ?? 0) > 5) {
+          <button mat-stroked-button type="button" (click)="categoriesExpanded.set(!categoriesExpanded())">
+            {{ categoriesExpanded() ? 'Ver menos' : 'Ver todas' }}
+          </button>
+        }
+      }
+    </div>
+
+    <div class="cc-card">
+      <div class="cc-card__header">Presupuestos del mes</div>
+      @if ((budgets()?.budgets?.length ?? 0) === 0) {
+        <p>Todavía no tenés presupuestos cargados.</p>
+        <a mat-stroked-button [routerLink]="['/w', workspaceId, 'budgets']">Ir a Presupuestos</a>
+      } @else {
+        <ul class="cc-stack cc-stack--sm">
+          @for (budget of visibleBudgets(); track budget.id) {
+            <li class="cc-category-list__row">
+              <div class="cc-cluster">
+                <span class="material-symbols-outlined" [style.color]="budget.category_color">{{ budget.category_icon }}</span>
+                <span>{{ budget.category_name }}</span>
+                <span style="margin-left: auto">{{ budget.spent_amount | currency: dashboard()?.currency : 'symbol-narrow' : '1.2-2' }} / {{ budget.limit_amount | currency: dashboard()?.currency : 'symbol-narrow' : '1.2-2' }}</span>
+              </div>
+              <div class="cc-progress" [class]="progressClass(budget.alert_level)">
+                <div class="cc-progress__bar" [style.width.%]="budget.progress_pct"></div>
+              </div>
+            </li>
+          }
+        </ul>
+        <div class="cc-cluster">
+          @if ((budgets()?.budgets?.length ?? 0) > 5) {
+            <button mat-stroked-button type="button" (click)="budgetsExpanded.set(!budgetsExpanded())">
+              {{ budgetsExpanded() ? 'Ver menos' : 'Ver todos acá' }}
+            </button>
+          }
+          <a mat-stroked-button [routerLink]="['/w', workspaceId, 'budgets']">Ir a Presupuestos</a>
+        </div>
+      }
+    </div>
+
+    <div class="cc-card">
+      <div class="cc-card__header">Servicios pagados</div>
+      @if ((dashboard()?.paid_services?.length ?? 0) === 0) {
+        <p>Sin servicios pagados este mes.</p>
+      } @else {
+        <ul class="cc-dashboard-breakdown-list cc-zebra-list">
+          @for (service of dashboard()?.paid_services; track service.service_name) {
+            <li>
+              <span>{{ service.service_name }}</span>
+              <strong>{{ service.amount | currency: dashboard()?.currency : 'symbol-narrow' : '1.2-2' }}</strong>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+
+    <div class="cc-card">
+      <div class="cc-card__header">Cuotas del mes</div>
+      @if ((dashboard()?.installment_breakdown?.length ?? 0) === 0) {
+        <p>Sin cuotas este mes.</p>
+      } @else {
+        <ul class="cc-dashboard-breakdown-list cc-zebra-list">
+          @for (installment of dashboard()?.installment_breakdown; track installment.description + installment.number) {
+            <li>
+              <span>
+                {{ installment.description }} · Cuota {{ installment.number }} de {{ installment.installments_count }}
+                <small [class.cc-dashboard-breakdown-list__paid]="installment.status === 'paid'">
+                  {{ installment.status === 'paid' ? 'Pagada' : 'Pendiente' }}
+                </small>
+              </span>
+              <strong>{{ installment.amount | currency: dashboard()?.currency : 'symbol-narrow' : '1.2-2' }}</strong>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+
+    <div class="cc-card" style="grid-column: 1 / -1">
+      <div class="cc-card__header">Por integrante</div>
+      @if ((dashboard()?.by_user?.length ?? 0) === 0) {
+        <p>Sin movimientos este mes.</p>
+      } @else {
+        <ul class="cc-stack cc-stack--sm">
+          @for (row of dashboard()?.by_user; track row.user_id) {
+            <li class="cc-member-list__row">
+              <strong class="cc-member-list__name">{{ row.user_name }}</strong>
+              <div class="cc-member-list__metrics">
+                <div class="cc-member-list__metric">
+                  <span>Ingresos</span>
+                  <strong>{{ row.income | currency: dashboard()?.currency : 'symbol-narrow' : '1.2-2' }}</strong>
+                </div>
+                <div class="cc-member-list__metric">
+                  <span>Gastos Categoria/Servicios</span>
+                  <strong>{{ row.expenses | currency: dashboard()?.currency : 'symbol-narrow' : '1.2-2' }}</strong>
+                </div>
+                <div class="cc-member-list__metric">
+                  <span>Cuotas</span>
+                  <strong>{{ row.installments | currency: dashboard()?.currency : 'symbol-narrow' : '1.2-2' }}</strong>
+                </div>
+                <div class="cc-member-list__metric cc-member-list__metric--balance">
+                  <span>Balance</span>
+                  <strong>{{ row.balance | currency: dashboard()?.currency : 'symbol-narrow' : '1.2-2' }}</strong>
+                </div>
+              </div>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+  </div>
+</section>

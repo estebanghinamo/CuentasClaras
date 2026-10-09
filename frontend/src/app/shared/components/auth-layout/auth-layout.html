@@ -1,0 +1,17 @@
+<div class="cc-auth">
+  <div class="cc-card cc-auth__card">
+    <div class="cc-auth__brand">
+      <img src="CuentasClaras.png" alt="" class="cc-auth__logo" />
+      <span class="cc-auth__brand-name">Cuentas Claras</span>
+    </div>
+
+    <div class="cc-auth__heading">
+      <h1 class="cc-h1">{{ title() }}</h1>
+      @if (subtitle()) {
+        <p class="cc-caption">{{ subtitle() }}</p>
+      }
+    </div>
+
+    <ng-content />
+  </div>
+</div>

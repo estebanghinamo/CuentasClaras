@@ -1,0 +1,72 @@
+<section class="cc-page">
+  <header class="cc-page__header">
+    <div class="cc-page__title">
+      <h1 class="cc-h1">Configuración</h1>
+    </div>
+  </header>
+
+  <div class="cc-stack">
+    <div class="cc-card">
+      <form class="cc-form" [formGroup]="form" (ngSubmit)="save()">
+
+        <mat-form-field class="cc-form__full" appearance="outline">
+          <mat-label>Nombre</mat-label>
+          <input matInput formControlName="name" />
+          @if (serverFieldError('name'); as message) {
+            <mat-error>{{ message }}</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Moneda</mat-label>
+          <mat-select formControlName="currency">
+            @for (currency of currencies; track currency) {
+              <mat-option [value]="currency">{{ currency }}</mat-option>
+            }
+          </mat-select>
+          <mat-hint>Cambiar la moneda no convierte los montos ya cargados.</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Tipo</mat-label>
+          <mat-select formControlName="type">
+            <mat-option value="individual">Individual</mat-option>
+            <mat-option value="shared_joint">Compartido conjunto</mat-option>
+            <mat-option value="shared_separate">Compartido separado</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <div class="cc-form__full cc-form__actions">
+          <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || saving()">
+            @if (saving()) {
+              <app-spinner [size]="20" />
+            } @else {
+              Guardar
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <div class="cc-card">
+      <div class="cc-card__header">Eliminar espacio</div>
+      <p>Esta acción no se puede deshacer. Se borran todos los registros del espacio.</p>
+      <form class="cc-form" (ngSubmit)="delete()">
+        <mat-form-field class="cc-form__full" appearance="outline">
+          <mat-label>Escribí "{{ context.activeWorkspace()?.name }}" para confirmar</mat-label>
+          <input matInput [(ngModel)]="confirmName" name="confirmName" />
+        </mat-form-field>
+        <div class="cc-form__full cc-form__actions">
+          <button
+            mat-stroked-button
+            color="warn"
+            type="submit"
+            [disabled]="confirmName !== context.activeWorkspace()?.name || deleting()"
+          >
+            Eliminar espacio
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>

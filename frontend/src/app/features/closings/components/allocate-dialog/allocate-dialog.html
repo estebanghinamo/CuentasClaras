@@ -1,0 +1,66 @@
+<h2 mat-dialog-title>Asignar sobrante</h2>
+
+<form [formGroup]="form" (ngSubmit)="submit()">
+  <mat-dialog-content class="cc-stack">
+    <p class="cc-caption">
+      Sobrante sin asignar: <strong>{{ data.closing.unallocated_amount | number: '1.2-2' }}</strong>
+    </p>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Al monedero</mat-label>
+      <input matInput type="number" step="0.01" min="0" inputmode="decimal" formControlName="to_wallet" />
+      @if (serverFieldError('to_wallet'); as message) {
+        <mat-error>{{ message }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Al mes siguiente ({{ nextMonthLabel }})</mat-label>
+      <input matInput type="number" step="0.01" min="0" inputmode="decimal" formControlName="to_next_month" />
+      @if (serverFieldError('to_next_month'); as message) {
+        <mat-error>{{ message }}</mat-error>
+      }
+    </mat-form-field>
+    @if (!nextMonthOpen) {
+      <p class="cc-caption">{{ nextMonthLabel }} ya está cerrado, no admite ingresos nuevos.</p>
+    }
+
+    @if (data.goals.length > 0) {
+      <p class="cc-caption">A metas activas</p>
+      <div class="cc-stack cc-stack--sm" formArrayName="goals">
+        @for (goal of data.goals; track goal.id; let i = $index) {
+          <mat-form-field appearance="outline">
+            <mat-label>{{ goal.name }}</mat-label>
+            <input matInput type="number" step="0.01" min="0" inputmode="decimal" [formControlName]="i" />
+            @if (serverFieldError('to_goals.' + i + '.amount'); as message) {
+              <mat-error>{{ message }}</mat-error>
+            }
+          </mat-form-field>
+        }
+      </div>
+    }
+
+    <p class="cc-caption" [class.cc-negative]="exceedsAvailable()">
+      Total a asignar: {{ totalRequested() | number: '1.2-2' }} / {{ data.closing.unallocated_amount | number: '1.2-2' }}
+    </p>
+
+    @if (exceedsAvailable()) {
+      <p class="cc-banner cc-banner--danger">El total supera el sobrante sin asignar.</p>
+    }
+
+    @if (formError(); as message) {
+      <p class="cc-banner cc-banner--danger">{{ message }}</p>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-stroked-button type="button" mat-dialog-close>Cancelar</button>
+    <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || saving() || exceedsAvailable() || nothingSelected()">
+      @if (saving()) {
+        <app-spinner [size]="20" />
+      } @else {
+        Asignar
+      }
+    </button>
+  </mat-dialog-actions>
+</form>

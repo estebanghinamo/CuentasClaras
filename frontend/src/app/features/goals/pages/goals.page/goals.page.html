@@ -1,0 +1,72 @@
+<section class="cc-page">
+  <header class="cc-page__header">
+    <div class="cc-page__title">
+      <h1 class="cc-h1">Metas de ahorro</h1>
+      <p class="cc-caption">Objetivos independientes del monedero</p>
+    </div>
+    <button mat-flat-button color="primary" (click)="openForm(null)">
+      <span class="material-symbols-outlined">add</span>
+      Nueva meta
+    </button>
+  </header>
+
+  <div class="cc-filterbar">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Estado</mat-label>
+      <mat-select [value]="status()" (selectionChange)="changeStatus($event.value)">
+        @for (option of statusOptions; track option) {
+          <mat-option [value]="option">{{ statusLabel(option) }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  @if (goals().length === 0) {
+    <p class="cc-card">No hay metas para este filtro.</p>
+  } @else {
+    <div class="cc-grid">
+      @for (goal of goals(); track goal.id) {
+        <div class="cc-card cc-goal-card">
+          <div class="cc-card__header">
+            <strong>{{ goal.name }}</strong>
+            <span class="cc-badge" [class.cc-badge--success]="goal.status === 'completed'" [class.cc-badge--danger]="goal.status === 'cancelled'">
+              {{ statusLabel(goal.status) }}
+            </span>
+          </div>
+
+          <div class="cc-progress" [class.is-ok]="goal.status === 'completed'">
+            <div class="cc-progress__bar" [style.width.%]="goal.progress_pct"></div>
+          </div>
+          <div class="cc-goal-card__meta">
+            <span>{{ goal.current_amount | currency: context.membership()?.currency : 'symbol-narrow' : '1.2-2' }} / {{ goal.target_amount | currency: context.membership()?.currency : 'symbol-narrow' : '1.2-2' }}</span>
+            <span>{{ goal.progress_pct }}%</span>
+          </div>
+
+          <div class="cc-goal-card__details cc-caption">
+            <span>Faltan {{ goal.remaining_amount | currency: context.membership()?.currency : 'symbol-narrow' : '1.2-2' }}</span>
+            @if (goal.days_left !== null) {
+              <span>{{ goal.days_left >= 0 ? goal.days_left + ' días restantes' : 'Vencida hace ' + -goal.days_left + ' días' }}</span>
+            }
+            @if (goal.suggested_monthly !== null) {
+              <span>Sugerido {{ goal.suggested_monthly | currency: context.membership()?.currency : 'symbol-narrow' : '1.2-2' }}/mes</span>
+            }
+          </div>
+
+          @if (goal.status !== 'cancelled') {
+            <div class="cc-goal-card__actions">
+              @if (goal.status === 'active') {
+                <button mat-stroked-button (click)="openContribute(goal, 'contribution')">Aportar</button>
+                <button mat-stroked-button (click)="openContribute(goal, 'transfer')">Del monedero</button>
+              }
+              <button mat-stroked-button (click)="openContribute(goal, 'withdrawal')">Retirar</button>
+              @if (goal.status === 'active') {
+                <button mat-stroked-button (click)="openForm(goal)">Editar</button>
+                <button mat-stroked-button color="warn" (click)="cancelGoal(goal)">Cancelar</button>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</section>

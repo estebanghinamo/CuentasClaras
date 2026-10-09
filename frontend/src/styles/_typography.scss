@@ -1,0 +1,81 @@
+// =============================================================================
+// Escala tipográfica. Clases globales para no repetir font-size en componentes.
+// =============================================================================
+
+.cc-display {
+  font-size: var(--cc-fs-3xl);
+  font-weight: var(--cc-fw-bold);
+  line-height: var(--cc-lh-tight);
+  letter-spacing: -0.02em;
+}
+
+.cc-h1 {
+  font-size: var(--cc-fs-2xl);
+  font-weight: var(--cc-fw-bold);
+  line-height: var(--cc-lh-tight);
+  letter-spacing: -0.01em;
+}
+
+.cc-h2 {
+  font-size: var(--cc-fs-xl);
+  font-weight: var(--cc-fw-semibold);
+  line-height: var(--cc-lh-tight);
+}
+
+.cc-h3 {
+  font-size: var(--cc-fs-lg);
+  font-weight: var(--cc-fw-semibold);
+  line-height: 1.3;
+}
+
+.cc-subtitle {
+  font-size: var(--cc-fs-md);
+  font-weight: var(--cc-fw-medium);
+  color: var(--cc-text-2);
+}
+
+.cc-body {
+  font-size: var(--cc-fs-md);
+}
+
+.cc-body-sm {
+  font-size: var(--cc-fs-sm);
+}
+
+.cc-caption {
+  font-size: var(--cc-fs-xs);
+  color: var(--cc-text-2);
+  letter-spacing: 0.01em;
+}
+
+.cc-overline {
+  font-size: var(--cc-fs-xs);
+  font-weight: var(--cc-fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--cc-text-3);
+}
+
+// Montos: siempre números tabulares para que las columnas alineen.
+.cc-amount {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+  font-weight: var(--cc-fw-semibold);
+  white-space: nowrap;
+
+  &--lg {
+    font-size: var(--cc-fs-2xl);
+    font-weight: var(--cc-fw-bold);
+    letter-spacing: -0.02em;
+  }
+
+  &--xl {
+    font-size: var(--cc-fs-3xl);
+    font-weight: var(--cc-fw-bold);
+    letter-spacing: -0.03em;
+  }
+
+  &--income { color: var(--cc-income); }
+  &--expense { color: var(--cc-expense); }
+  &--muted { color: var(--cc-text-2); font-weight: var(--cc-fw-medium); }
+}

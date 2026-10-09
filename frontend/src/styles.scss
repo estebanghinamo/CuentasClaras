@@ -1,0 +1,12 @@
+// =============================================================================
+// Cuentas Claras — hoja de estilos global
+// Orden importa: tokens → base → tipografía → layout → utilidades → Material.
+// Detalle y reglas de uso en ESPECIFICACION_TECNICA.md, capítulo D.
+// =============================================================================
+@use 'tokens';
+@use 'base';
+@use 'typography';
+@use 'layout';
+@use 'stat-cards';
+@use 'utilities';
+@use 'material-theme';

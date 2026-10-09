@@ -1,0 +1,42 @@
+<h2 mat-dialog-title>Detalle del gasto</h2>
+
+<mat-dialog-content class="cc-expense-details">
+  <div class="cc-expense-details__heading">
+    <span
+      class="material-symbols-outlined cc-expense-details__icon"
+      [style.color]="data.expense.category_color || 'var(--cc-primary)'"
+    >{{ data.expense.category_icon || 'receipt_long' }}</span>
+    <div>
+      <strong>{{ data.expense.category_name || 'Sin categoría' }}</strong>
+      <span>{{ data.expense.user_name }}</span>
+    </div>
+  </div>
+
+  <div class="cc-expense-details__amount">
+    <span>Monto</span>
+    <strong>{{ data.expense.amount | currency: context.membership()?.currency : 'symbol-narrow' : '1.2-2' }}</strong>
+  </div>
+
+  <dl class="cc-expense-details__list">
+    <div>
+      <dt>Descripción</dt>
+      <dd>{{ data.expense.description || 'Sin descripción' }}</dd>
+    </div>
+    <div>
+      <dt>Fecha</dt>
+      <dd>{{ data.expense.date }}</dd>
+    </div>
+    <div>
+      <dt>Medio de pago</dt>
+      <dd>{{ paymentMethodLabel() }}</dd>
+    </div>
+    <div>
+      <dt>Cargado el</dt>
+      <dd>{{ data.expense.created_at | date: 'short' }}</dd>
+    </div>
+  </dl>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button mat-dialog-close>Cerrar</button>
+</mat-dialog-actions>

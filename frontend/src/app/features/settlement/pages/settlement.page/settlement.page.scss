@@ -1,0 +1,68 @@
+.cc-row-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cc-row-list__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--cc-space-2);
+  padding: var(--cc-space-3) 0;
+  border-bottom: 1px solid var(--cc-divider);
+}
+
+.cc-row-list__item:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.cc-row-list__item:first-child {
+  padding-top: 0;
+}
+
+.cc-row-list__main {
+  display: flex;
+  align-items: baseline;
+  gap: var(--cc-space-2);
+  min-width: 0;
+}
+
+.cc-row-list__detail {
+  color: var(--cc-text-2);
+  overflow-wrap: anywhere;
+}
+
+.cc-row-list__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--cc-space-3);
+  flex-wrap: wrap;
+}
+
+.cc-settlement-balance {
+  gap: var(--cc-space-1);
+  border-left: 4px solid var(--cc-text-2);
+}
+
+.cc-settlement-balance__amount {
+  font-weight: var(--cc-fw-bold);
+}
+
+.cc-settlement-balance.is-positive {
+  border-left-color: var(--cc-success);
+}
+
+.cc-settlement-balance.is-positive .cc-settlement-balance__amount {
+  color: var(--cc-success);
+}
+
+.cc-settlement-balance.is-negative {
+  border-left-color: var(--cc-danger);
+}
+
+.cc-settlement-balance.is-negative .cc-settlement-balance__amount {
+  color: var(--cc-danger);
+}

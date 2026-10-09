@@ -1,0 +1,91 @@
+.cc-expenses-hero {
+  align-items: center;
+  text-align: center;
+  gap: var(--cc-space-1);
+}
+
+.cc-expenses-hero__amount {
+  font-size: var(--cc-fs-3xl, 2.5rem);
+  font-weight: var(--cc-fw-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+// El manager de categorías es una acción secundaria de mantenimiento, no
+// algo que se use en el día a día - va colapsado y sin el peso visual de
+// antes (título más discreto, mismo tratamiento que otros paneles).
+.cc-expenses-categories-panel {
+  font-size: var(--cc-fs-sm);
+}
+
+.cc-expense-list__row {
+  display: flex;
+  align-items: center;
+  gap: var(--cc-space-3);
+  padding: var(--cc-space-3);
+  border: 1px solid var(--cc-border);
+  border-radius: var(--cc-radius-sm);
+}
+
+.cc-expense-list__icon {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--cc-radius-full);
+}
+
+.cc-expense-list__info {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.cc-expense-list__name {
+  display: flex;
+  align-items: baseline;
+  gap: var(--cc-space-2);
+  flex-wrap: wrap;
+}
+
+.cc-expense-list__details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cc-space-2);
+  color: var(--cc-text-2);
+  font-size: var(--cc-fs-sm);
+}
+
+.cc-expense-list__details span + span {
+  padding-left: var(--cc-space-2);
+  border-left: 1px solid var(--cc-border);
+}
+
+.cc-expense-list__end {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--cc-space-1);
+}
+
+.cc-expense-list__amount {
+  font-variant-numeric: tabular-nums;
+}
+
+.cc-expense-list__actions {
+  display: flex;
+  align-items: center;
+}
+
+@media (max-width: 599px) {
+  .cc-expense-list__row {
+    align-items: flex-start;
+  }
+
+  .cc-expense-list__end {
+    align-items: flex-end;
+  }
+}

@@ -1,0 +1,91 @@
+<section class="cc-page">
+  <header class="cc-page__header">
+    <div class="cc-page__title">
+      <h1 class="cc-h1">Liquidación</h1>
+      <p class="cc-caption">Quién gastó, cuánto le toca a cada uno y quién le debe a quién</p>
+    </div>
+    <div class="cc-page__actions">
+      <button mat-flat-button color="primary" (click)="openFreePayment()">
+        <span class="material-symbols-outlined">add</span>
+        Registrar pago
+      </button>
+    </div>
+  </header>
+
+  <div class="cc-grid cc-grid--stats">
+    <div class="cc-card cc-stat">
+      <span class="cc-stat__label">Total gastado</span>
+      <span class="cc-stat__value">{{ summary()?.total_expenses ?? 0 | number: '1.2-2' }}</span>
+    </div>
+    <div class="cc-card cc-stat">
+      <span class="cc-stat__label">Por persona</span>
+      <span class="cc-stat__value">{{ summary()?.share_per_person ?? 0 | number: '1.2-2' }}</span>
+    </div>
+    <div class="cc-card cc-stat">
+      <span class="cc-stat__label">Miembros</span>
+      <span class="cc-stat__value">{{ summary()?.member_count ?? 0 }}</span>
+    </div>
+  </div>
+
+  <div class="cc-card">
+    <div class="cc-card__header">Estado de cada miembro</div>
+    <div class="cc-grid cc-grid--stats">
+      @for (balance of summary()?.balances; track balance.user_id) {
+        <div class="cc-card cc-settlement-balance" [class]="'is-' + balanceTone(balance.balance)">
+          <strong>{{ balance.user_name }}</strong>
+          <span class="cc-caption">Pagó {{ balance.paid | number: '1.2-2' }} · Le tocaba {{ balance.share | number: '1.2-2' }}</span>
+          <span class="cc-settlement-balance__amount">
+            @if (balanceTone(balance.balance) === 'positive') {
+              Le deben {{ balance.balance | number: '1.2-2' }}
+            } @else if (balanceTone(balance.balance) === 'negative') {
+              Debe {{ -balance.balance | number: '1.2-2' }}
+            } @else {
+              Está al día
+            }
+          </span>
+        </div>
+      }
+    </div>
+  </div>
+
+  <div class="cc-card">
+    <div class="cc-card__header">Liquidación sugerida</div>
+    @if ((summary()?.pending_settlements?.length ?? 0) === 0) {
+      <p>No hay deudas pendientes.</p>
+    } @else {
+      <ul class="cc-row-list cc-zebra-list">
+        @for (transfer of summary()?.pending_settlements; track transfer.from_user_id + '-' + transfer.to_user_id) {
+          <li class="cc-row-list__item">
+            <span>
+              <strong>{{ transfer.from_user_name }}</strong> le debe pagar
+              <strong>{{ transfer.amount | number: '1.2-2' }}</strong> a <strong>{{ transfer.to_user_name }}</strong>
+            </span>
+            <button mat-stroked-button (click)="openMarkAsPaid(transfer)">Marcar como pagada</button>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+
+  <div class="cc-card">
+    <div class="cc-card__header">Pagos registrados</div>
+    @if ((summary()?.settled_payments?.length ?? 0) === 0) {
+      <p>Todavía no se registró ningún pago.</p>
+    } @else {
+      <ul class="cc-row-list cc-zebra-list">
+        @for (payment of summary()?.settled_payments; track payment.id) {
+          <li class="cc-row-list__item">
+            <div class="cc-row-list__main">
+              <strong>{{ payment.from_user_name }} → {{ payment.to_user_name }}</strong>
+              <span class="cc-row-list__detail">{{ payment.amount | number: '1.2-2' }}@if (payment.note) { · {{ payment.note }} }</span>
+            </div>
+            <div class="cc-row-list__meta">
+              <span class="cc-caption">{{ payment.paid_at }} · registró {{ payment.registered_by_name }}</span>
+              <button mat-stroked-button color="warn" (click)="undoPayment(payment.id)">Deshacer</button>
+            </div>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+</section>

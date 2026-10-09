@@ -1,0 +1,9 @@
+<output
+  class="cc-spinner"
+  aria-label="Cargando"
+  [style.--cc-spinner-size.px]="size()"
+>
+  @for (dot of dots; track dot) {
+    <span class="cc-spinner__dot" [style.--cc-spinner-index]="dot"></span>
+  }
+</output>

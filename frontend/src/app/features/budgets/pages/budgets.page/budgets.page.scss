@@ -1,0 +1,14 @@
+.cc-budget-card {
+  gap: var(--cc-space-2);
+}
+
+.cc-budget-card__meta {
+  display: flex;
+  justify-content: space-between;
+}
+
+.cc-budget-card__actions {
+  display: flex;
+  gap: var(--cc-space-2);
+  margin-top: var(--cc-space-2);
+}

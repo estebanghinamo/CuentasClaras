@@ -1,0 +1,134 @@
+// =============================================================================
+// Base: reset mínimo, tipografía global, foco, scroll, accesibilidad.
+// =============================================================================
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  height: 100%;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--cc-bg);
+  color: var(--cc-text);
+  font-family: var(--cc-font);
+  font-size: var(--cc-fs-md);
+  line-height: var(--cc-lh);
+  font-weight: var(--cc-fw-regular);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overscroll-behavior-y: none; // evita el "rebote" blanco en Capacitor
+  transition: background-color var(--cc-dur) var(--cc-ease), color var(--cc-dur) var(--cc-ease);
+}
+
+h1, h2, h3, h4, h5, h6, p, figure, ul, ol, dl {
+  margin: 0;
+}
+
+ul, ol {
+  padding: 0;
+  list-style: none;
+}
+
+img, svg, video, canvas {
+  display: block;
+  max-width: 100%;
+}
+
+button, input, select, textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  background: none;
+  border: 0;
+  padding: 0;
+}
+
+a {
+  color: var(--cc-primary);
+  text-decoration: none;
+
+  &:hover {
+    color: var(--cc-primary-hover);
+    text-decoration: underline;
+  }
+}
+
+// Foco visible solo con teclado (accesibilidad)
+:focus {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--cc-primary);
+  outline-offset: 2px;
+  border-radius: var(--cc-radius-sm);
+}
+
+::selection {
+  background: var(--cc-primary-soft);
+  color: var(--cc-text);
+}
+
+// Scrollbars discretas (desktop)
+@media (pointer: fine) {
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--cc-border);
+    border-radius: var(--cc-radius-full);
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: var(--cc-text-3);
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+// Ícono Material Symbols (fuente cargada en index.html)
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  font-size: 24px;
+  line-height: 1;
+  vertical-align: middle;
+  user-select: none;
+
+  &.is-filled {
+    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  }
+}
+
+// Respetar preferencia de menos movimiento - SOLO para las animaciones
+// decorativas propias (fade-up de entrada, shimmer del skeleton). Un reset
+// con "*" acá adentro también frenaba mat-spinner/mat-progress-bar (son
+// indicadores FUNCIONALES, no decorativos: si el navegador/SO reporta
+// prefers-reduced-motion, el loader global quedaba congelado sin girar,
+// aunque siguiera visible - ver ERROR_LOG.md).
+@media (prefers-reduced-motion: reduce) {
+  .cc-fade-up,
+  .cc-skeleton {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+
+  html {
+    scroll-behavior: auto !important;
+  }
+}

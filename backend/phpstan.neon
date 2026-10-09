@@ -1,0 +1,26 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    paths:
+        - app
+
+    level: 5
+
+    tmpDir: storage/framework/phpstan
+
+    stubFiles:
+        - .phpstan-stubs/PersonalAccessToken.stub.php
+
+    # Laravel\Sanctum\HasApiTokens declara $accessToken como @var TToken (no
+    # nullable) pero en runtime SI puede ser null (usuario sin token de acceso
+    # actual asignado via withAccessToken, ej. otro guard o contexto de test).
+    # El '?->' en currentAccessToken()?->... es una guarda real, no redundante -
+    # es el @var del paquete el que esta mal tipado, no nuestro codigo.
+    ignoreErrors:
+        -
+            identifier: nullsafe.neverNull
+            paths:
+                - app/Services/Auth/AuthService.php
+                - app/Services/Auth/PasswordResetService.php
+                - app/Services/Auth/TwoFactorService.php

@@ -1,0 +1,9 @@
+@if (loading.isLoading()) {
+  <div class="cc-loading-overlay">
+    <div class="cc-loading-overlay__panel">
+      <app-spinner [size]="48" />
+    </div>
+  </div>
+}
+
+<router-outlet />

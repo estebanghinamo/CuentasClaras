@@ -1,0 +1,74 @@
+.cc-section-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--cc-space-3);
+  margin: var(--cc-space-2) 0 var(--cc-space-1);
+}
+
+.cc-section-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--cc-space-1);
+  padding: var(--cc-space-4) var(--cc-space-2);
+  border: 1.5px solid var(--cc-border);
+  border-radius: var(--cc-radius-md);
+  background: var(--cc-surface);
+  color: var(--cc-text);
+  cursor: pointer;
+  transition:
+    border-color var(--cc-dur-fast) var(--cc-ease),
+    background var(--cc-dur-fast) var(--cc-ease),
+    box-shadow var(--cc-dur-fast) var(--cc-ease),
+    transform var(--cc-dur-fast) var(--cc-ease);
+}
+
+.cc-section-tile:hover {
+  border-color: var(--cc-primary);
+  background: var(--cc-surface-hover);
+}
+
+.cc-section-tile:active {
+  transform: scale(0.97);
+}
+
+.cc-section-tile.is-selected {
+  border-color: var(--cc-primary);
+  background: var(--cc-primary-soft);
+  box-shadow: var(--cc-shadow-1);
+}
+
+.cc-section-tile__icon {
+  font-size: 26px;
+  color: var(--cc-text-2);
+  transition: color var(--cc-dur-fast) var(--cc-ease);
+}
+
+.cc-section-tile.is-selected .cc-section-tile__icon {
+  color: var(--cc-primary);
+}
+
+.cc-section-tile__label {
+  font-size: var(--cc-fs-sm);
+  font-weight: var(--cc-fw-medium);
+  text-align: center;
+}
+
+.cc-section-tile__check {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  font-size: 18px;
+  color: var(--cc-primary);
+  opacity: 0;
+  transform: scale(0.6);
+  transition:
+    opacity var(--cc-dur-fast) var(--cc-ease),
+    transform var(--cc-dur-fast) var(--cc-ease);
+}
+
+.cc-section-tile.is-selected .cc-section-tile__check {
+  opacity: 1;
+  transform: scale(1);
+}

@@ -1,0 +1,126 @@
+<section class="cc-page">
+  <header class="cc-page__header">
+    <div class="cc-page__title">
+      <h1 class="cc-h1">Gastos</h1>
+    </div>
+    <div class="cc-page__actions">
+      <app-month-year-picker [year]="year()" [month]="month()" (periodChange)="goToPeriod($event)" />
+    </div>
+  </header>
+
+  <div class="cc-card cc-expenses-hero">
+    <span class="cc-caption">Total filtrado</span>
+    <strong class="cc-expenses-hero__amount">{{ meta()?.total_amount ?? 0 | currency: context.membership()?.currency : 'symbol-narrow' : '1.2-2' }}</strong>
+  </div>
+
+  <div class="cc-filterbar cc-filterbar--compact">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Filtrar por categoría</mat-label>
+      <mat-chip-grid #categoryChipGrid aria-label="Categorías seleccionadas">
+        @for (category of selectedCategories(); track category.id) {
+          <mat-chip-row (removed)="removeCategoryFilter(category.id)">
+            <span class="material-symbols-outlined">{{ category.icon }}</span>
+            {{ category.name }}
+            <button matChipRemove aria-label="Quitar categoría">
+              <span class="material-symbols-outlined">cancel</span>
+            </button>
+          </mat-chip-row>
+        }
+      </mat-chip-grid>
+      <input
+        aria-label="Buscar categoría"
+        placeholder="Buscar categoría…"
+        [value]="categorySearch()"
+        (input)="onCategorySearchInput($any($event.target).value)"
+        [matChipInputFor]="categoryChipGrid"
+        [matAutocomplete]="categoryFilterAuto"
+        [matChipInputAddOnBlur]="false"
+      />
+      <mat-autocomplete #categoryFilterAuto="matAutocomplete" (optionSelected)="onCategorySelected($event)">
+        @for (category of filteredCategories(); track category.id) {
+          <mat-option [value]="category.id">
+            <span class="material-symbols-outlined">{{ category.icon }}</span>
+            {{ category.name }}
+          </mat-option>
+        } @empty {
+          <mat-option disabled>Sin categorías que coincidan</mat-option>
+        }
+      </mat-autocomplete>
+    </mat-form-field>
+  </div>
+
+  <mat-expansion-panel class="cc-expenses-categories-panel">
+    <mat-expansion-panel-header>
+      <mat-panel-title>
+        <span class="material-symbols-outlined">category</span>
+        Gestionar categorías ({{ categories().length }})
+      </mat-panel-title>
+    </mat-expansion-panel-header>
+    <app-category-manager-panel
+      [workspaceId]="workspaceId"
+      [categories]="categories()"
+      (changed)="reloadCategories()"
+    />
+  </mat-expansion-panel>
+
+  <div class="cc-card">
+    @if (items().length === 0) {
+      <p>Sin gastos que coincidan con el filtro.</p>
+    } @else {
+      <ul class="cc-stack cc-stack--sm cc-zebra-list">
+        @for (expense of items(); track expense.id) {
+          <li class="cc-expense-list__row">
+            <div class="cc-expense-list__icon" [style.background]="(expense.category_color ?? 'var(--cc-primary)') + '22'" [style.color]="expense.category_color ?? 'var(--cc-primary)'">
+              <span class="material-symbols-outlined">{{ expense.category_icon ?? 'shopping_cart' }}</span>
+            </div>
+            <div class="cc-expense-list__info">
+              <div class="cc-expense-list__name">
+                <strong>{{ expense.category_name ?? 'Sin categoría' }}</strong>
+                @if (expense.description) { <span class="cc-caption">{{ expense.description }}</span> }
+              </div>
+              <div class="cc-expense-list__details">
+                <span>{{ expense.date }}</span>
+                <span>{{ paymentMethodLabel(expense) }}</span>
+              </div>
+            </div>
+            <div class="cc-expense-list__end">
+              <strong class="cc-expense-list__amount">{{ expense.amount | currency: context.membership()?.currency : 'symbol-narrow' : '1.2-2' }}</strong>
+              <div class="cc-expense-list__actions">
+                <button
+                  mat-icon-button
+                  type="button"
+                  aria-label="Ver información del gasto"
+                  matTooltip="Ver información"
+                  (click)="openDetails(expense)"
+                >
+                  <span class="material-symbols-outlined">info</span>
+                </button>
+                @if (expense.can_edit) {
+                  <button mat-icon-button type="button" aria-label="Editar gasto" matTooltip="Editar" (click)="openForm(expense)">
+                    <span class="material-symbols-outlined">edit</span>
+                  </button>
+                  <button mat-icon-button type="button" aria-label="Eliminar gasto" matTooltip="Eliminar" (click)="delete(expense)">
+                    <span class="material-symbols-outlined">delete</span>
+                  </button>
+                }
+              </div>
+            </div>
+          </li>
+        }
+      </ul>
+    }
+
+    @if (meta(); as m) {
+      <div class="cc-cluster">
+        <button mat-stroked-button (click)="changePage(-1)" [disabled]="m.page <= 1">‹ Anterior</button>
+        <span class="cc-caption">Página {{ m.page }} de {{ m.last_page }}</span>
+        <button mat-stroked-button (click)="changePage(1)" [disabled]="m.page >= m.last_page">Siguiente ›</button>
+      </div>
+    }
+  </div>
+
+  <button class="cc-fab" (click)="openForm(null)">
+    <span class="material-symbols-outlined">add</span>
+    Nuevo gasto
+  </button>
+</section>

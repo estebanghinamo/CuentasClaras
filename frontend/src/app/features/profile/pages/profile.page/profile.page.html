@@ -1,0 +1,173 @@
+<section class="cc-page">
+  <header class="cc-page__header">
+    <div class="cc-page__title">
+      <h1 class="cc-h1">Perfil</h1>
+    </div>
+    <div class="cc-page__actions cc-theme-switch">
+      <span class="material-symbols-outlined">light_mode</span>
+      <mat-slide-toggle
+        [checked]="isDarkMode()"
+        (change)="toggleTheme($event.checked)"
+        aria-label="Cambiar entre tema claro y oscuro"
+      />
+      <span class="material-symbols-outlined">dark_mode</span>
+    </div>
+  </header>
+
+  <div class="cc-stack">
+    <div class="cc-card">
+      <div class="cc-card__header">Datos personales</div>
+      <form class="cc-form" [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+        <mat-form-field appearance="outline">
+          <mat-label>Nombre</mat-label>
+          <input matInput formControlName="name" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Idioma</mat-label>
+          <mat-select formControlName="locale">
+            <mat-option value="es">Español</mat-option>
+            <mat-option value="en">English</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <div class="cc-form__full cc-form__actions">
+          <button mat-flat-button color="primary" type="submit" [disabled]="profileForm.invalid || savingProfile()">
+            @if (savingProfile()) {
+              <app-spinner [size]="20" />
+            } @else {
+              Guardar
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <div class="cc-card">
+      <div class="cc-card__header">Cambiar contraseña</div>
+      <form class="cc-form" [formGroup]="passwordForm" (ngSubmit)="changePassword()">
+        @if (passwordBannerMessage()) {
+          <div class="cc-form__full cc-banner cc-banner--danger">
+            <span class="material-symbols-outlined">error</span>
+            <span class="cc-banner__text">{{ passwordBannerMessage() }}</span>
+          </div>
+        }
+
+        <mat-form-field appearance="outline">
+          <mat-label>Contraseña actual</mat-label>
+          <input matInput type="password" formControlName="current_password" autocomplete="current-password" />
+          @if (passwordFieldError('current_password'); as message) {
+            <mat-error>{{ message }}</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Nueva contraseña</mat-label>
+          <input matInput type="password" formControlName="password" autocomplete="new-password" />
+          <mat-hint>Mínimo 8 caracteres, con letras y números.</mat-hint>
+          @if (passwordForm.controls.password.hasError('minlength')) {
+            <mat-error>Mínimo 8 caracteres.</mat-error>
+          } @else if (passwordForm.controls.password.hasError('pattern')) {
+            <mat-error>Tiene que incluir letras y números.</mat-error>
+          } @else if (passwordFieldError('password'); as message) {
+            <mat-error>{{ message }}</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Repetir nueva contraseña</mat-label>
+          <input matInput type="password" formControlName="password_confirmation" autocomplete="new-password" />
+          @if (passwordForm.hasError('passwordMismatch') && passwordForm.controls.password_confirmation.dirty) {
+            <mat-error>Las contraseñas no coinciden.</mat-error>
+          }
+        </mat-form-field>
+
+        <div class="cc-form__full cc-form__actions">
+          <button mat-flat-button color="primary" type="submit" [disabled]="passwordForm.invalid || savingPassword()">
+            @if (savingPassword()) {
+              <app-spinner [size]="20" />
+            } @else {
+              Cambiar contraseña
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <div class="cc-card">
+      <div class="cc-card__header">Verificación en dos pasos</div>
+
+      @switch (twoFactorStep()) {
+        @case ('idle') {
+          @if (authService.currentUser()?.two_factor_enabled) {
+            <form class="cc-form" [formGroup]="disableForm" (ngSubmit)="disableTwoFactor()">
+              <p class="cc-form__full">
+                El 2FA está activo en tu cuenta. Para desactivarlo, confirmá con la contraseña de tu cuenta (la
+                que usás para iniciar sesión, no un código de la app de autenticación).
+              </p>
+              @if (twoFactorError()) {
+                <div class="cc-form__full cc-banner cc-banner--danger">
+                  <span class="material-symbols-outlined">error</span>
+                  <span class="cc-banner__text">{{ twoFactorError() }}</span>
+                </div>
+              }
+              <mat-form-field class="cc-form__full" appearance="outline">
+                <mat-label>Contraseña de tu cuenta</mat-label>
+                <input matInput type="password" formControlName="password" autocomplete="current-password" />
+              </mat-form-field>
+              <div class="cc-form__full cc-form__actions">
+                <button mat-stroked-button color="warn" type="submit" [disabled]="disableForm.invalid || twoFactorBusy()">
+                  Desactivar 2FA
+                </button>
+              </div>
+            </form>
+          } @else {
+            <p>Agregá una capa extra de seguridad con una app de autenticación.</p>
+            <button mat-flat-button color="primary" (click)="startEnable()" [disabled]="twoFactorBusy()">
+              Activar 2FA
+            </button>
+          }
+        }
+        @case ('setup') {
+          @if (twoFactorError()) {
+            <div class="cc-banner cc-banner--danger">
+              <span class="material-symbols-outlined">error</span>
+              <span class="cc-banner__text">{{ twoFactorError() }}</span>
+            </div>
+          }
+          <p>Escaneá este código con Google Authenticator, Authy u otra app TOTP.</p>
+          <qrcode [qrdata]="otpauthUrl()" [width]="200" errorCorrectionLevel="M" />
+          <p><code>{{ secret() }}</code></p>
+          <form class="cc-form" [formGroup]="confirmForm" (ngSubmit)="confirmTwoFactor()">
+            <mat-form-field class="cc-form__full" appearance="outline">
+              <mat-label>Código de 6 dígitos</mat-label>
+              <input matInput formControlName="code" inputmode="numeric" />
+            </mat-form-field>
+            <div class="cc-form__full cc-form__actions">
+              <button mat-flat-button color="primary" type="submit" [disabled]="confirmForm.invalid || twoFactorBusy()">
+                Confirmar
+              </button>
+            </div>
+          </form>
+        }
+        @case ('confirmed') {
+          <div class="cc-banner cc-banner--warning">
+            <span class="material-symbols-outlined">warning</span>
+            <span class="cc-banner__text">
+              Guardá estos códigos de recuperación en un lugar seguro. Cada uno se puede usar una sola vez y no
+              se van a volver a mostrar.
+            </span>
+          </div>
+          <ul>
+            @for (code of recoveryCodes(); track code) {
+              <li><code>{{ code }}</code></li>
+            }
+          </ul>
+          <button mat-flat-button color="primary" (click)="finishSetup()">Listo</button>
+        }
+      }
+    </div>
+
+    <app-notification-preferences />
+  </div>
+</section>

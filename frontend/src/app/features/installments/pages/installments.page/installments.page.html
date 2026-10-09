@@ -1,0 +1,56 @@
+<section class="cc-page">
+  <header class="cc-page__header">
+    <div class="cc-page__title">
+      <h1 class="cc-h1">Cuotas</h1>
+      <p class="cc-caption">Compras financiadas y pagos mensuales</p>
+    </div>
+    <button mat-flat-button color="primary" (click)="openForm(null)">
+      <span class="material-symbols-outlined">add</span>
+      Nueva compra
+    </button>
+  </header>
+
+  <div class="cc-filterbar">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Estado</mat-label>
+      <mat-select [value]="status()" (selectionChange)="changeStatus($event.value)">
+        @for (option of statusOptions; track option) {
+          <mat-option [value]="option">{{ statusLabel(option) }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <div class="cc-card">
+    @if (items().length === 0) {
+      <p>No hay compras en cuotas para este filtro.</p>
+    } @else {
+      <ul class="cc-stack cc-stack--sm cc-zebra-list">
+        @for (item of items(); track installmentRowKey(item)) {
+          <li class="cc-installment-list__row">
+            <div class="cc-installment-list__info">
+              <div class="cc-installment-list__name">
+                <strong>{{ item.description }}</strong>
+                <span class="cc-caption">{{ item.category_name ?? 'Sin categoría' }}</span>
+              </div>
+              <div class="cc-installment-list__details">
+                <span>Total {{ item.total_amount | currency: context.membership()?.currency : 'symbol-narrow' : '1.2-2' }}</span>
+                <span>{{ item.installment_amount | currency: context.membership()?.currency : 'symbol-narrow' : '1.2-2' }} por cuota</span>
+                <span>{{ item.paid_count }} / {{ item.installments_count }} pagadas</span>
+                <span>Restan {{ item.remaining_amount | currency: context.membership()?.currency : 'symbol-narrow' : '1.2-2' }}</span>
+              </div>
+              <div class="cc-installment-list__track"><span [style.width.%]="progress(item)"></span></div>
+            </div>
+            <div class="cc-installment-list__actions">
+              <button mat-stroked-button (click)="openDetail(item)">Ver cuotas</button>
+              @if (item.can_edit && item.status !== 'cancelled') {
+                <button mat-stroked-button (click)="openForm(item)">Editar</button>
+                <button mat-stroked-button color="warn" (click)="delete(item)">Cancelar</button>
+              }
+            </div>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+</section>

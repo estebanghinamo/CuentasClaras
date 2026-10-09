@@ -1,0 +1,39 @@
+<button
+  mat-icon-button
+  [matMenuTriggerFor]="menu"
+  (menuOpened)="notifications.loadRecentUnread()"
+  aria-label="Notificaciones"
+>
+  @if (notifications.unreadCount() > 0) {
+    <span class="material-symbols-outlined" aria-hidden="true" [matBadge]="notifications.unreadCount()" matBadgeColor="warn" matBadgeSize="small">
+      notifications
+    </span>
+  } @else {
+    <span class="material-symbols-outlined" aria-hidden="true">notifications</span>
+  }
+</button>
+
+<mat-menu #menu="matMenu" class="cc-notification-menu">
+  <div class="cc-notification-menu__header" role="presentation" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+    <strong>Notificaciones</strong>
+    @if (notifications.unreadCount() > 0) {
+      <button mat-button (click)="notifications.markAllRead()">Marcar todas leídas</button>
+    }
+  </div>
+
+  @if (notifications.notifications().length === 0) {
+    <p class="cc-notification-menu__empty cc-caption">No tenés notificaciones sin leer.</p>
+  } @else {
+    @for (item of notifications.notifications(); track item.id) {
+      <button mat-menu-item class="is-unread" (click)="open(item)">
+        <div class="cc-notification-menu__item">
+          <strong>{{ item.title }}</strong>
+          <span class="cc-caption">{{ item.body }}</span>
+          <span class="cc-notification-menu__date">{{ item.created_at | date: 'short' }}</span>
+        </div>
+      </button>
+    }
+  }
+
+  <a mat-menu-item routerLink="/notifications" class="cc-notification-menu__view-all">Ver todas</a>
+</mat-menu>

@@ -1,0 +1,71 @@
+// !important: mismo bug que en los formularios (ver _layout.scss,
+// mat-dialog-content.cc-stack) - .mat-mdc-dialog-content{display:block} de
+// Angular Material tiene la misma especificidad que esta clase y gana por
+// orden de carga, rompiendo el grid.
+mat-dialog-content.cc-expense-details {
+  display: grid !important;
+  gap: var(--cc-space-4);
+}
+
+.cc-expense-details__heading {
+  display: flex;
+  align-items: center;
+  gap: var(--cc-space-3);
+}
+
+.cc-expense-details__heading > div {
+  display: grid;
+  gap: var(--cc-space-1);
+}
+
+.cc-expense-details__heading span:not(.material-symbols-outlined) {
+  color: var(--cc-text-2);
+  font-size: var(--cc-fs-sm);
+}
+
+.cc-expense-details__icon {
+  font-size: 28px;
+}
+
+.cc-expense-details__amount {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--cc-space-3);
+  padding: var(--cc-space-3);
+  border-radius: var(--cc-radius-sm);
+  background: var(--cc-primary-soft);
+}
+
+.cc-expense-details__amount span,
+.cc-expense-details__list dt {
+  color: var(--cc-text-2);
+  font-size: var(--cc-fs-sm);
+}
+
+.cc-expense-details__amount strong {
+  font-size: var(--cc-fs-xl);
+}
+
+.cc-expense-details__list {
+  display: grid;
+  gap: var(--cc-space-3);
+  margin: 0;
+}
+
+.cc-expense-details__list div {
+  display: grid;
+  gap: var(--cc-space-1);
+  padding-bottom: var(--cc-space-3);
+  border-bottom: 1px solid var(--cc-divider);
+}
+
+.cc-expense-details__list div:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.cc-expense-details__list dt,
+.cc-expense-details__list dd {
+  margin: 0;
+}

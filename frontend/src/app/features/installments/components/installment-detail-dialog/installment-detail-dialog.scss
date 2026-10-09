@@ -1,0 +1,70 @@
+.cc-installment-detail__summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--cc-space-2);
+}
+
+.cc-installment-detail__summary div {
+  display: grid;
+  gap: var(--cc-space-1);
+  padding: var(--cc-space-3);
+  border-radius: var(--cc-radius-sm);
+  background: var(--cc-surface-2);
+}
+
+.cc-installment-detail__summary span,
+.cc-installment-detail__payment span {
+  color: var(--cc-text-2);
+  font-size: var(--cc-fs-sm);
+}
+
+.cc-installment-detail__progress {
+  display: grid;
+  gap: var(--cc-space-2);
+}
+
+.cc-installment-detail__progress > div:first-child {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--cc-space-2);
+}
+
+.cc-installment-detail__track {
+  height: 8px;
+  overflow: hidden;
+  border-radius: var(--cc-radius-full);
+  background: var(--cc-divider);
+}
+
+.cc-installment-detail__track span {
+  display: block;
+  height: 100%;
+  background: var(--cc-success);
+}
+
+.cc-installment-detail__payment {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--cc-space-3);
+  padding: var(--cc-space-3);
+  border: 1px solid var(--cc-border);
+  border-radius: var(--cc-radius-sm);
+}
+
+.cc-installment-detail__payment > div {
+  display: grid;
+  gap: var(--cc-space-1);
+}
+
+.cc-installment-detail__pay-action {
+  display: grid;
+  justify-items: end;
+  gap: var(--cc-space-1);
+}
+
+@media (max-width: 599px) {
+  .cc-installment-detail__summary {
+    grid-template-columns: 1fr;
+  }
+}

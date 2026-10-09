@@ -1,0 +1,48 @@
+<mat-form-field class="cc-form__full" appearance="outline">
+  <mat-label>Nombre</mat-label>
+  <input matInput [formControl]="form().controls.name" maxlength="150" />
+  @if (fieldError()('name'); as message) {
+    <mat-error>{{ message }}</mat-error>
+  }
+</mat-form-field>
+
+<mat-form-field appearance="outline">
+  <mat-label>Monto {{ form().controls.is_estimated.value ? 'estimado' : '' }}</mat-label>
+  <input matInput type="number" step="0.01" min="0.01" inputmode="decimal" [formControl]="form().controls.amount" />
+  @if (fieldError()('amount'); as message) {
+    <mat-error>{{ message }}</mat-error>
+  }
+</mat-form-field>
+
+<mat-checkbox [formControl]="form().controls.is_estimated">El monto es estimado (varía cada mes)</mat-checkbox>
+
+<app-day-of-month-picker
+  [label]="'Día de vencimiento' + (form().controls.due_day_end.value ? ' (desde)' : '')"
+  [day]="form().controls.due_day_start.value"
+  [errorMessage]="fieldError()('due_day_start')"
+  (dayChange)="selectDay('due_day_start', $event)"
+/>
+
+<app-day-of-month-picker
+  label="Día de vencimiento hasta (opcional, para un rango)"
+  [day]="form().controls.due_day_end.value"
+  [allowClear]="true"
+  [errorMessage]="fieldError()('due_day_end')"
+  (dayChange)="selectDay('due_day_end', $event)"
+/>
+
+<div>
+  <p class="cc-caption">Recargo por mora</p>
+  <mat-button-toggle-group [formControl]="form().controls.late_fee_type" aria-label="Tipo de recargo">
+    <mat-button-toggle value="fixed">Monto fijo</mat-button-toggle>
+    <mat-button-toggle value="percentage">Porcentaje</mat-button-toggle>
+  </mat-button-toggle-group>
+</div>
+
+<mat-form-field appearance="outline">
+  <mat-label>{{ form().controls.late_fee_type.value === 'percentage' ? 'Recargo (%)' : 'Recargo ($)' }}</mat-label>
+  <input matInput type="number" step="0.01" min="0" [formControl]="form().controls.late_fee_value" />
+  @if (fieldError()('late_fee_value'); as message) {
+    <mat-error>{{ message }}</mat-error>
+  }
+</mat-form-field>

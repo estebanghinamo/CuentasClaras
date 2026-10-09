@@ -1,0 +1,91 @@
+<section class="cc-page">
+  <header class="cc-page__header">
+    <div class="cc-page__title">
+      <h1 class="cc-h1">{{ context.activeWorkspace()?.name }}</h1>
+    </div>
+    <div class="cc-page__actions">
+      @if (isOwner()) {
+        <a mat-stroked-button [routerLink]="['/w', workspaceId, 'settings']">Configuración</a>
+      } @else {
+        <button mat-stroked-button (click)="leave()" [disabled]="busy()">Salir del espacio</button>
+      }
+    </div>
+  </header>
+
+  <div class="cc-stack">
+    <div class="cc-card">
+      <div class="cc-card__header">Miembros</div>
+      <ul class="cc-row-list cc-zebra-list">
+        @for (member of members(); track member.user_id) {
+          <li class="cc-row-list__item">
+            <div class="cc-row-list__main">
+              <strong>{{ member.name }}</strong>
+              <span class="cc-row-list__detail">{{ member.email }}</span>
+            </div>
+            <div class="cc-row-list__meta">
+              <span class="cc-badge" [class.cc-badge--success]="member.role === 'owner'">
+                {{ member.role === 'owner' ? 'Propietario' : 'Miembro' }}
+              </span>
+              @if (isOwner() && member.role !== 'owner') {
+                <button mat-stroked-button color="warn" (click)="removeMember(member)" [disabled]="busy()">
+                  Quitar
+                </button>
+              }
+            </div>
+          </li>
+        }
+      </ul>
+    </div>
+
+    @if (isOwner() && workspaceType() !== 'individual') {
+      <div class="cc-card">
+        <div class="cc-card__header">Invitar a alguien</div>
+        <form class="cc-form" [formGroup]="inviteForm" (ngSubmit)="createInvitation()">
+          <mat-form-field class="cc-form__full" appearance="outline">
+            <mat-label>Email (opcional)</mat-label>
+            <input matInput type="email" formControlName="email" />
+            @if (serverFieldError('email'); as message) {
+              <mat-error>{{ message }}</mat-error>
+            }
+            <mat-hint>Si lo dejás vacío, se genera un link para compartir con quien quieras.</mat-hint>
+          </mat-form-field>
+          <div class="cc-form__full cc-form__actions">
+            <button mat-flat-button color="primary" type="submit" [disabled]="inviteForm.invalid || busy()">
+              @if (busy()) {
+                <app-spinner [size]="20" />
+              } @else {
+                Crear invitación
+              }
+            </button>
+          </div>
+        </form>
+
+        @if (invitations().length > 0) {
+          <ul class="cc-row-list cc-zebra-list">
+            @for (invitation of invitations(); track invitation.id) {
+              <li class="cc-row-list__item">
+                <div class="cc-row-list__main">
+                  <strong>{{ invitation.code }}</strong>
+                  @if (invitation.email) {
+                    <span class="cc-row-list__detail">{{ invitation.email }}</span>
+                  }
+                </div>
+                <div class="cc-row-list__meta">
+                  <span class="cc-caption">{{ statusLabel(invitation.status) }}</span>
+                  @if (invitation.status === 'pending') {
+                    <span class="cc-row-list__actions">
+                      <button mat-stroked-button (click)="copyLink(invitation)">Copiar link</button>
+                      <button mat-stroked-button color="warn" (click)="revokeInvitation(invitation)" [disabled]="busy()">
+                        Revocar
+                      </button>
+                    </span>
+                  }
+                </div>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+    }
+  </div>
+</section>

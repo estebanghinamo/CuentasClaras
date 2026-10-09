@@ -1,0 +1,303 @@
+// =============================================================================
+// Tarjetas de resumen con color por tipo (--cc-dashboard-stat-color) y listas
+// de desglose (por categoría/integrante/servicio/cuota) - compartidas entre
+// Dashboard (M-14) y el detalle de un cierre mensual (M-13), que muestran la
+// misma clase de datos (en vivo vs. foto congelada) y deben verse igual.
+// =============================================================================
+@use 'tokens' as t;
+
+// -----------------------------------------------------------------------------
+// Hero de "Disponible" (solo Dashboard, 2026-09 rediseño) - el número que
+// realmente importa de un vistazo, con jerarquía real sobre el resto de las
+// cifras. Reusa .cc-card--accent (gradiente ya definido, sin uso hasta ahora).
+// -----------------------------------------------------------------------------
+.cc-dashboard-hero {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cc-space-2);
+
+  &__label {
+    font-size: var(--cc-fs-sm);
+    font-weight: var(--cc-fw-medium);
+    opacity: 0.85;
+  }
+
+  &__value {
+    font-size: clamp(2.25rem, 1.6rem + 2.5vw, 3.25rem);
+    font-weight: var(--cc-fw-bold);
+    letter-spacing: -0.03em;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+
+    &.is-negative { color: var(--cc-danger-soft); }
+  }
+
+  &__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--cc-space-4);
+    margin-top: var(--cc-space-2);
+    padding-top: var(--cc-space-3);
+    border-top: 1px solid color-mix(in srgb, var(--cc-on-primary) 18%, transparent);
+  }
+
+  &__metric {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    span:first-child {
+      font-size: var(--cc-fs-xs);
+      opacity: 0.75;
+    }
+
+    span:last-child {
+      font-size: var(--cc-fs-md);
+      font-weight: var(--cc-fw-semibold);
+      font-variant-numeric: tabular-nums;
+    }
+  }
+}
+
+// Fila compacta de totales secundarios (antes: 9 stat-cards del mismo peso).
+// Chips horizontales con scroll en mobile, wrap en desktop - un vistazo, no
+// una pantalla completa de números todos gritando al mismo volumen.
+.cc-dashboard-secondary {
+  display: flex;
+  gap: var(--cc-space-2);
+  overflow-x: auto;
+  padding-bottom: var(--cc-space-1);
+  scrollbar-width: thin;
+
+  @include t.up(sm) {
+    flex-wrap: wrap;
+    overflow-x: visible;
+  }
+}
+
+.cc-dashboard-chip {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--cc-space-2) var(--cc-space-3);
+  border-radius: var(--cc-radius-md);
+  border: 1px solid var(--cc-divider);
+  background: var(--cc-surface);
+  min-width: 130px;
+
+  &__label {
+    font-size: var(--cc-fs-xs);
+    color: var(--cc-text-2);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__value {
+    font-size: var(--cc-fs-md);
+    font-weight: var(--cc-fw-semibold);
+    font-variant-numeric: tabular-nums;
+    color: var(--cc-text);
+  }
+
+  &--accent { border-color: color-mix(in srgb, var(--cc-dashboard-stat-color) 40%, var(--cc-divider)); }
+  &--accent &__value { color: var(--cc-dashboard-stat-color); }
+}
+
+.cc-dashboard-stats {
+  grid-template-columns: 1fr;
+}
+
+.cc-dashboard-stat {
+  border-left: 4px solid var(--cc-dashboard-stat-color);
+  background: color-mix(in srgb, var(--cc-dashboard-stat-color) 7%, var(--cc-surface));
+}
+
+.cc-dashboard-stat .cc-stat__label {
+  color: var(--cc-text);
+  line-height: var(--cc-lh-tight);
+}
+
+.cc-dashboard-stat .cc-stat__value {
+  color: var(--cc-text);
+  overflow-wrap: anywhere;
+}
+
+.cc-dashboard-stat--income {
+  --cc-dashboard-stat-color: var(--cc-success);
+}
+
+.cc-dashboard-stat--paid-expenses {
+  --cc-dashboard-stat-color: var(--cc-danger);
+}
+
+.cc-dashboard-stat--category-expenses,
+.cc-dashboard-stat--services {
+  --cc-dashboard-stat-color: color-mix(in srgb, var(--cc-danger) 62%, var(--cc-surface));
+}
+
+.cc-dashboard-stat--installments,
+.cc-dashboard-stat--paid-installments {
+  --cc-dashboard-stat-color: var(--cc-warning);
+}
+
+.cc-dashboard-stat--paid-installments-complete {
+  --cc-dashboard-stat-color: var(--cc-danger);
+}
+
+.cc-dashboard-stat__check {
+  vertical-align: middle;
+  margin-left: var(--cc-space-1);
+  font-size: 1.1em;
+  color: var(--cc-danger);
+}
+
+.cc-dashboard-stat--available {
+  --cc-dashboard-stat-color: var(--cc-success);
+}
+
+.cc-dashboard-stat--savings {
+  --cc-dashboard-stat-color: var(--cc-info);
+}
+
+.cc-dashboard-stat--unallocated {
+  --cc-dashboard-stat-color: var(--cc-warning);
+}
+
+@media (min-width: 600px) {
+  .cc-dashboard-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 960px) {
+  .cc-dashboard-stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.cc-overdue-list {
+  width: 100%;
+}
+
+.cc-dashboard-breakdown-list {
+  display: grid;
+  gap: var(--cc-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cc-dashboard-breakdown-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--cc-space-3);
+  padding: var(--cc-space-3);
+  border: 1px solid var(--cc-border);
+  border-radius: var(--cc-radius-sm);
+}
+
+.cc-dashboard-breakdown-list span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.cc-dashboard-breakdown-list small {
+  display: inline-block;
+  margin-left: var(--cc-space-2);
+  color: var(--cc-warning);
+  font-size: var(--cc-fs-xs);
+}
+
+.cc-dashboard-breakdown-list__paid {
+  color: var(--cc-success) !important;
+}
+
+.cc-overdue-list__row {
+  display: flex;
+  align-items: center;
+  gap: var(--cc-space-3);
+  padding: var(--cc-space-2) 0;
+  padding-inline: var(--cc-space-3);
+  border: 1px solid color-mix(in srgb, var(--cc-danger) 35%, var(--cc-danger-soft));
+  border-radius: var(--cc-radius-sm);
+}
+
+.cc-overdue-list__detail {
+  margin-left: auto;
+  text-align: right;
+}
+
+.cc-category-list__row {
+  padding: var(--cc-space-3);
+  border: 1px solid var(--cc-border);
+  border-radius: var(--cc-radius-sm);
+}
+
+.cc-member-list__row {
+  display: grid;
+  gap: var(--cc-space-3);
+  padding: var(--cc-space-3);
+  border: 1px solid var(--cc-border);
+  border-radius: var(--cc-radius-sm);
+  container-type: inline-size;
+}
+
+.cc-member-list__name {
+  color: var(--cc-text);
+}
+
+.cc-member-list__metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--cc-space-2);
+}
+
+.cc-member-list__metric {
+  display: grid;
+  gap: var(--cc-space-1);
+  min-width: 0;
+  padding: var(--cc-space-2);
+  border-radius: var(--cc-radius-sm);
+  background: var(--cc-surface-2);
+}
+
+.cc-member-list__metric span {
+  color: var(--cc-text-2);
+  font-size: var(--cc-fs-xs);
+}
+
+.cc-member-list__metric strong {
+  overflow-wrap: break-word;
+  font-size: var(--cc-fs-sm);
+}
+
+@container (min-width: 560px) {
+  .cc-member-list__metrics {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.cc-member-list__metric--balance {
+  background: var(--cc-primary-soft);
+}
+
+@media (max-width: 599px) {
+  .cc-overdue-list__row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: var(--cc-space-1);
+  }
+
+  .cc-overdue-list__detail {
+    margin-left: 0;
+    text-align: left;
+  }
+
+  .cc-member-list__metrics {
+    grid-template-columns: 1fr;
+  }
+}

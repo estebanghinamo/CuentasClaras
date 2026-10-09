@@ -1,0 +1,47 @@
+<h2 mat-dialog-title>{{ data.entry ? 'Editar ingreso' : 'Nuevo ingreso' }}</h2>
+
+<form [formGroup]="form" (ngSubmit)="submit()">
+  <mat-dialog-content class="cc-stack cc-dialog-form">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Monto</mat-label>
+      <input matInput type="number" step="0.01" min="0.01" inputmode="decimal" formControlName="amount" />
+      @if (serverFieldError('amount'); as message) {
+        <mat-error>{{ message }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Fecha</mat-label>
+      <input matInput type="date" formControlName="date" [min]="currentMonthStart" [max]="currentMonthEnd" />
+      @if (serverFieldError('date'); as message) {
+        <mat-error>{{ message }}</mat-error>
+      } @else if (serverFieldError('period'); as message) {
+        <mat-error>{{ message }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Concepto</mat-label>
+      <input matInput formControlName="concept" maxlength="150" [matAutocomplete]="conceptAuto" />
+      <mat-autocomplete #conceptAuto="matAutocomplete">
+        @for (suggestion of filteredSuggestions(); track suggestion) {
+          <mat-option [value]="suggestion">{{ suggestion }}</mat-option>
+        }
+      </mat-autocomplete>
+      @if (serverFieldError('concept'); as message) {
+        <mat-error>{{ message }}</mat-error>
+      }
+    </mat-form-field>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-stroked-button type="button" mat-dialog-close>Cancelar</button>
+    <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || saving()">
+      @if (saving()) {
+        <app-spinner [size]="20" />
+      } @else {
+        Guardar
+      }
+    </button>
+  </mat-dialog-actions>
+</form>

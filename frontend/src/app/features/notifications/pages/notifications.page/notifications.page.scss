@@ -1,0 +1,43 @@
+.cc-notification-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--cc-space-3);
+  width: 100%;
+  border-left: 4px solid var(--cc-divider);
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--cc-dur-fast, 0.15s) var(--cc-ease, ease);
+
+  &:hover {
+    background: var(--cc-surface-2);
+  }
+
+  &.is-unread {
+    border-left-color: var(--cc-primary);
+    background: color-mix(in srgb, var(--cc-primary) 6%, var(--cc-surface));
+  }
+}
+
+.cc-notification-row__icon {
+  flex: 0 0 auto;
+  color: var(--cc-text-2);
+}
+
+.cc-notification-row__main {
+  display: grid;
+  gap: var(--cc-space-1);
+  min-width: 0;
+  flex: 1;
+  overflow-wrap: anywhere;
+}
+
+.cc-notification-row__dot {
+  flex: 0 0 auto;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--cc-radius-full);
+  background: var(--cc-primary);
+}

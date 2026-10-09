@@ -1,0 +1,110 @@
+.cc-health-gauge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--cc-space-2);
+  width: 100%;
+}
+
+.cc-health-gauge__svg {
+  width: 100%;
+  max-width: 220px;
+  height: auto;
+}
+
+.cc-health-gauge__track {
+  fill: none;
+  stroke: var(--cc-divider);
+  stroke-width: 14;
+  stroke-linecap: round;
+}
+
+.cc-health-gauge__value {
+  fill: none;
+  stroke-width: 14;
+  stroke-linecap: round;
+  stroke: var(--cc-text-2);
+  transition: stroke-dashoffset 0.4s ease;
+
+  &.is-good {
+    stroke: var(--cc-success);
+  }
+
+  &.is-warning {
+    stroke: var(--cc-warning);
+  }
+
+  &.is-bad {
+    stroke: var(--cc-danger);
+  }
+}
+
+.cc-health-gauge__center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: calc(-1 * var(--cc-space-8));
+}
+
+.cc-health-gauge__score {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1;
+
+  &--empty {
+    color: var(--cc-text-2);
+  }
+}
+
+.cc-health-gauge__label {
+  display: flex;
+  align-items: center;
+  gap: var(--cc-space-1);
+  font-size: 0.85rem;
+  color: var(--cc-text-2);
+}
+
+.cc-health-gauge__info {
+  display: inline-flex;
+  align-items: center;
+  background: none;
+  border: none;
+  color: var(--cc-text-2);
+  cursor: pointer;
+  padding: 0;
+
+  .material-symbols-outlined {
+    font-size: 1rem;
+  }
+}
+
+.cc-health-gauge__breakdown-title {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--cc-space-1);
+}
+
+.cc-health-gauge__toggle {
+  background: none;
+  border: none;
+  color: var(--cc-primary);
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
+}
+
+.cc-health-gauge__breakdown {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--cc-space-3);
+}
+
+.cc-health-gauge__breakdown-row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--cc-space-2);
+}

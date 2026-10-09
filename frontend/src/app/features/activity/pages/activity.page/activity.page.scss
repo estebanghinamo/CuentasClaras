@@ -1,0 +1,47 @@
+.cc-activity-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--cc-space-3);
+  width: 100%;
+  border-left: 4px solid var(--cc-activity-row-color, var(--cc-primary));
+  background: color-mix(in srgb, var(--cc-activity-row-color, var(--cc-primary)) 10%, var(--cc-surface));
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--cc-dur-fast, 0.15s) var(--cc-ease, ease);
+}
+
+.cc-activity-row:hover {
+  background: color-mix(in srgb, var(--cc-activity-row-color, var(--cc-primary)) 20%, var(--cc-surface));
+}
+
+.cc-activity-row__avatar {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--cc-radius-full);
+  background: var(--cc-activity-row-color, var(--cc-primary));
+  color: #fff;
+  font-weight: var(--cc-fw-bold);
+  font-size: var(--cc-fs-sm);
+}
+
+.cc-activity-row__main {
+  display: grid;
+  gap: var(--cc-space-1);
+  min-width: 0;
+  flex: 1;
+}
+
+.cc-activity-row__summary {
+  overflow-wrap: anywhere;
+}
+
+.cc-activity-row__chevron {
+  flex: 0 0 auto;
+  color: var(--cc-text-2);
+}

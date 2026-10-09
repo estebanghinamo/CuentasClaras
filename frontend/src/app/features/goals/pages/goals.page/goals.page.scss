@@ -1,0 +1,23 @@
+.cc-goal-card {
+  gap: var(--cc-space-2);
+}
+
+.cc-goal-card__meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--cc-fs-sm);
+  color: var(--cc-text-2);
+}
+
+.cc-goal-card__details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cc-space-3);
+}
+
+.cc-goal-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cc-space-2);
+  margin-top: var(--cc-space-2);
+}

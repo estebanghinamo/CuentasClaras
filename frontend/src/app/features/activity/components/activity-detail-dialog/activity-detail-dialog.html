@@ -1,0 +1,41 @@
+<h2 mat-dialog-title class="cc-activity-detail__title">
+  <span class="cc-activity-detail__avatar" [style.background]="userColor">{{ userInitial }}</span>
+  <span>
+    <strong>{{ data.entry.user_name }}</strong>
+    <span class="cc-caption">{{ actionLabel }} · {{ formatDate(data.entry.created_at) }}</span>
+  </span>
+</h2>
+
+<mat-dialog-content class="cc-stack">
+  <p>{{ data.entry.summary }}</p>
+
+  <div class="cc-activity-detail__meta">
+    <span class="cc-badge">{{ entityTypeLabel }}</span>
+    <span class="cc-caption">ID {{ data.entry.entity_id }}</span>
+  </div>
+
+  @if (diff.length > 0) {
+    <table class="cc-activity-detail__table">
+      <thead>
+        <tr>
+          <th>Campo</th>
+          <th>Antes</th>
+          <th>Después</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of diff; track row.key) {
+          <tr>
+            <td>{{ fieldLabel(row.key) }}</td>
+            <td>{{ formatValue(row.oldValue) }}</td>
+            <td>{{ formatValue(row.newValue) }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-flat-button color="primary" mat-dialog-close>Cerrar</button>
+</mat-dialog-actions>

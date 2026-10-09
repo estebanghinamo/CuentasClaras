@@ -1,0 +1,60 @@
+<section class="cc-page">
+  <header class="cc-page__header">
+    <div class="cc-page__title">
+      <h1 class="cc-h1">Cierres mensuales</h1>
+      <p class="cc-caption">Histórico de meses cerrados</p>
+    </div>
+  </header>
+
+  @if (closings().length === 0) {
+    <div class="cc-card cc-empty">
+      <div class="cc-empty__icon">
+        <span class="material-symbols-outlined">event_available</span>
+      </div>
+      <p class="cc-empty__title">Todavía no hay meses cerrados</p>
+      <p class="cc-empty__text">
+        El día 1 de cada mes el sistema cierra automáticamente el mes anterior: congela los totales, calcula tu salud
+        financiera y te deja asignar el sobrante al monedero o a tus metas. En cuanto se cierre el primer mes, vas a
+        verlo acá.
+      </p>
+    </div>
+  } @else {
+    <div class="cc-grid">
+      @for (closing of closings(); track closing.id) {
+        <a class="cc-card cc-closing-card" [routerLink]="['/w', workspaceId, 'closings', closing.year, closing.month]">
+          <div class="cc-card__header">
+            <strong>{{ monthLabel(closing) }}</strong>
+            @if (closing.allocation_status === 'pending') {
+              <span class="cc-badge cc-badge--warning">Sobrante sin asignar</span>
+            } @else if (closing.allocation_status === 'not_applicable') {
+              <span class="cc-badge cc-badge--danger">Déficit</span>
+            } @else if (closing.allocation_status === 'allocated') {
+              <span class="cc-badge cc-badge--success">Asignado</span>
+            }
+          </div>
+
+          <div class="cc-closing-card__totals">
+            <div>
+              <span class="cc-caption">Ingresos</span>
+              <strong>{{ closing.total_income | number: '1.2-2' }}</strong>
+            </div>
+            <div>
+              <span class="cc-caption">Gastos + servicios + cuotas</span>
+              <strong>{{ closing.total_expenses + closing.total_services + closing.total_installments | number: '1.2-2' }}</strong>
+            </div>
+            <div>
+              <span class="cc-caption">Sobrante</span>
+              <strong [class.cc-negative]="closing.remaining_amount < 0">{{ closing.remaining_amount | number: '1.2-2' }}</strong>
+            </div>
+            @if (closing.health_score !== null) {
+              <div>
+                <span class="cc-caption">Health score</span>
+                <strong>{{ closing.health_score }}</strong>
+              </div>
+            }
+          </div>
+        </a>
+      }
+    </div>
+  }
+</section>

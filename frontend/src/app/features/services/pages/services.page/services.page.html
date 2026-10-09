@@ -1,0 +1,152 @@
+<section class="cc-page">
+  <header class="cc-page__header">
+    <h1 class="cc-h1">Servicios</h1>
+  </header>
+
+  <mat-tab-group (selectedIndexChange)="onTabChange($event)">
+    <mat-tab label="Este mes">
+      <div class="cc-stack" style="margin-top: var(--cc-space-4)">
+        <div class="cc-page__actions">
+          <app-month-year-picker [year]="year()" [month]="month()" (periodChange)="goToPeriod($event)" />
+        </div>
+
+        <div class="cc-services-summary">
+          <div class="cc-services-summary__item">
+            <div class="cc-services-summary__icon">
+              <span class="material-symbols-outlined">request_quote</span>
+            </div>
+            <div class="cc-services-summary__info">
+              <span class="cc-caption">Esperado</span>
+              <strong>{{ payments()?.total_expected ?? 0 | currency: context.membership()?.currency : 'symbol-narrow' : '1.2-2' }}</strong>
+            </div>
+          </div>
+          <div class="cc-services-summary__item is-success">
+            <div class="cc-services-summary__icon">
+              <span class="material-symbols-outlined">task_alt</span>
+            </div>
+            <div class="cc-services-summary__info">
+              <span class="cc-caption">Pagado</span>
+              <strong>{{ payments()?.total_paid ?? 0 | currency: context.membership()?.currency : 'symbol-narrow' : '1.2-2' }}</strong>
+            </div>
+          </div>
+          <div class="cc-services-summary__item is-warning">
+            <div class="cc-services-summary__icon">
+              <span class="material-symbols-outlined">schedule</span>
+            </div>
+            <div class="cc-services-summary__info">
+              <span class="cc-caption">Pendientes</span>
+              <strong>{{ payments()?.pending_count ?? 0 }}</strong>
+            </div>
+          </div>
+          <div class="cc-services-summary__item is-danger">
+            <div class="cc-services-summary__icon">
+              <span class="material-symbols-outlined">error</span>
+            </div>
+            <div class="cc-services-summary__info">
+              <span class="cc-caption">Vencidos</span>
+              <strong>{{ payments()?.overdue_count ?? 0 }}</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="cc-card">
+          @if ((payments()?.items?.length ?? 0) === 0) {
+            <p>No hay servicios este mes.</p>
+          } @else {
+            <ul class="cc-stack cc-stack--sm cc-zebra-list">
+              @for (item of payments()?.items; track item.id) {
+                <li class="cc-service-list__row">
+                  <div class="cc-service-list__info">
+                    <div class="cc-service-list__name">
+                      <span class="cc-service-list__status" [class]="statusClass(item.status)">{{ statusLabel(item.status) }}</span>
+                      <strong>{{ item.service_name }}</strong>
+                    </div>
+                    <div class="cc-service-list__details">
+                      <span>{{ paymentAmount(item) | currency: context.membership()?.currency : 'symbol-narrow' : '1.2-2' }}</span>
+                      @if (paymentDifference(item) !== 0) {
+                        <span>{{ paymentDifferenceLabel(item) }} {{ absolutePaymentDifference(item) | currency: context.membership()?.currency : 'symbol-narrow' : '1.2-2' }}</span>
+                      }
+                      <span>Vence {{ item.due_date_end }}</span>
+                    </div>
+                  </div>
+                  <span class="cc-service-list__actions">
+                    @if (item.status !== 'paid') {
+                      <button mat-flat-button color="primary" (click)="openPay(item)">Marcar pagado</button>
+                    } @else {
+                      <button mat-stroked-button (click)="unpay(item)">Despagar</button>
+                    }
+                  </span>
+                </li>
+              }
+            </ul>
+          }
+        </div>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Todos los servicios">
+      <div class="cc-card" style="margin-top: var(--cc-space-4)">
+        @if (services().length === 0) {
+          <p>Todavía no cargaste ningún servicio.</p>
+        } @else {
+          <ul class="cc-stack cc-stack--sm cc-zebra-list">
+            @for (service of services(); track service.id) {
+              <li class="cc-service-list__row">
+                <div class="cc-service-list__info">
+                  <div class="cc-service-list__name">
+                    <strong>{{ service.name }}</strong>
+                    @if (!service.active) {
+                      <span class="cc-caption">Inactivo</span>
+                    }
+                  </div>
+                  <div class="cc-service-list__details">
+                    <span>{{ service.amount | currency: context.membership()?.currency : 'symbol-narrow' : '1.2-2' }}{{ service.is_estimated ? ' (estimado)' : '' }}</span>
+                    <span>Vence {{ service.due_day_start }}@if (service.due_day_end) { - {{ service.due_day_end }} }</span>
+                  </div>
+                </div>
+                <span class="cc-service-list__actions">
+                  <button mat-stroked-button (click)="openForm(service)">Editar</button>
+                  <button mat-stroked-button color="warn" (click)="delete(service)">Eliminar</button>
+                </span>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Impagos">
+      <div class="cc-card" style="margin-top: var(--cc-space-4)">
+        @if (overdue().length === 0) {
+          <p>No hay pagos vencidos.</p>
+        } @else {
+          <ul class="cc-stack cc-stack--sm cc-zebra-list">
+            @for (item of overdue(); track item.id) {
+              <li class="cc-service-list__row">
+                <div class="cc-service-list__info">
+                  <div class="cc-service-list__name">
+                    <span class="cc-service-list__status" [class]="statusClass(item.status)">{{ statusLabel(item.status) }}</span>
+                    <strong>{{ item.service_name }}</strong>
+                  </div>
+                  <div class="cc-service-list__details">
+                    <span>{{ item.expected_amount | currency: context.membership()?.currency : 'symbol-narrow' : '1.2-2' }}</span>
+                    <span>{{ item.month }}/{{ item.year }}</span>
+                    <span>Venció {{ item.due_date_end }}</span>
+                  </div>
+                </div>
+                <span class="cc-service-list__actions">
+                  <button mat-flat-button color="primary" (click)="openPay(item)">Marcar pagado</button>
+                </span>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+
+  <button class="cc-fab" (click)="openForm(null)">
+    <span class="material-symbols-outlined">add</span>
+    Nuevo servicio
+  </button>
+</section>

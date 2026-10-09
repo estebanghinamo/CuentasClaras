@@ -1,0 +1,66 @@
+<div class="cc-card">
+  <div class="cc-card__header">Notificaciones</div>
+
+  @if (loading()) {
+    <p>Cargando preferencias...</p>
+  } @else {
+    <form [formGroup]="form" (ngSubmit)="save()" class="cc-stack cc-stack--md">
+      <div>
+        <strong>Avisar servicios por vencer con</strong>
+        <mat-chip-set aria-label="Días de recordatorio">
+          @for (day of reminderDays(); track day) {
+            <mat-chip-row (removed)="removeReminderDay(day)">
+              {{ day === 0 ? 'El mismo día' : day + ' día(s) antes' }}
+              <button matChipRemove aria-label="Quitar">
+                <span class="material-symbols-outlined">cancel</span>
+              </button>
+            </mat-chip-row>
+          }
+        </mat-chip-set>
+        <mat-form-field appearance="outline" style="max-width: 220px">
+          <mat-label>Agregar días antes</mat-label>
+          <input matInput type="number" [formControl]="newDayControl" min="0" max="30" />
+        </mat-form-field>
+        <button mat-stroked-button type="button" (click)="addReminderDay()">Agregar</button>
+      </div>
+
+      <div>
+        <strong>Avisar de presupuestos cuando</strong>
+        <div class="cc-stack cc-stack--sm">
+          @for (level of allBudgetAlertLevels; track level) {
+            <mat-checkbox
+              [checked]="isBudgetAlertLevelChecked(level)"
+              (change)="toggleBudgetAlertLevel(level, $event.checked)"
+            >
+              {{ budgetAlertLevelLabels[level] }}
+            </mat-checkbox>
+          }
+        </div>
+      </div>
+
+      <div formGroupName="channels">
+        <strong>Canales</strong>
+        <div class="cc-stack cc-stack--sm">
+          <mat-checkbox formControlName="in_app">En la app</mat-checkbox>
+          <mat-checkbox formControlName="push">Push al celular</mat-checkbox>
+          <mat-checkbox formControlName="email">Email</mat-checkbox>
+        </div>
+      </div>
+
+      <div>
+        <strong>Silenciar por completo</strong>
+        <div class="cc-stack cc-stack--sm">
+          @for (type of allNotificationTypes; track type) {
+            <mat-checkbox [checked]="isTypeMuted(type)" (change)="toggleMutedType(type, $event.checked)">
+              {{ mutedTypeLabels[type] }}
+            </mat-checkbox>
+          }
+        </div>
+      </div>
+
+      <button mat-flat-button color="primary" type="submit" [disabled]="saving()">
+        {{ saving() ? 'Guardando...' : 'Guardar preferencias' }}
+      </button>
+    </form>
+  }
+</div>

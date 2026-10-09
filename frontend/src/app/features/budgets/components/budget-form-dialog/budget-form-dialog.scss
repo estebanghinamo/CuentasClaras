@@ -1,0 +1,25 @@
+.cc-budget-form__category {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--cc-space-2);
+}
+
+.cc-budget-form__category mat-form-field {
+  flex: 1;
+}
+
+.cc-budget-form__category button {
+  flex: 0 0 auto;
+  margin-top: var(--cc-space-1);
+}
+
+@media (max-width: 599px) {
+  .cc-budget-form__category {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .cc-budget-form__category button {
+    margin-top: 0;
+  }
+}

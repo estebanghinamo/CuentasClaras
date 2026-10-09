@@ -1,0 +1,36 @@
+.cc-notification-menu__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--cc-space-2);
+  padding: var(--cc-space-2) var(--cc-space-3);
+}
+
+.cc-notification-menu__empty {
+  padding: var(--cc-space-3);
+  margin: 0;
+}
+
+.cc-notification-menu__item {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+  padding-block: var(--cc-space-1);
+  white-space: normal;
+}
+
+.cc-notification-menu__date {
+  font-size: var(--cc-fs-xs);
+  color: var(--cc-text-2);
+}
+
+.is-unread {
+  background: var(--cc-surface-2);
+}
+
+.cc-notification-menu__view-all {
+  border-top: 1px solid var(--cc-border);
+  color: var(--cc-primary);
+  text-align: center;
+  justify-content: center;
+}

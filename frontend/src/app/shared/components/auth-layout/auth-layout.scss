@@ -1,0 +1,33 @@
+.cc-auth__brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--cc-space-2);
+  text-align: center;
+}
+
+.cc-auth__logo {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--cc-radius-lg);
+  object-fit: cover;
+}
+
+.cc-auth__brand-name {
+  font-size: var(--cc-fs-sm);
+  font-weight: var(--cc-fw-semibold);
+  color: var(--cc-text-2);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.cc-auth__heading {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cc-space-1);
+  text-align: center;
+}
+
+.cc-auth__heading .cc-h1 {
+  font-size: var(--cc-fs-2xl);
+}

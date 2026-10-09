@@ -1,0 +1,270 @@
+// =============================================================================
+// Utilidades: estados (skeleton, empty, badge, progress), visibilidad, texto.
+// =============================================================================
+@use 'tokens' as t;
+
+// Colores de texto
+.cc-text-2 { color: var(--cc-text-2); }
+.cc-text-3 { color: var(--cc-text-3); }
+.cc-positive { color: var(--cc-success); }
+.cc-negative { color: var(--cc-danger); }
+.cc-primary { color: var(--cc-primary); }
+
+.cc-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cc-visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.cc-hide-mobile {
+  @include t.down(md) { display: none !important; }
+}
+
+.cc-hide-desktop {
+  @include t.up(md) { display: none !important; }
+}
+
+// -----------------------------------------------------------------------------
+// Badges de estado (pagado / pendiente / vencido, niveles de alerta, roles)
+// -----------------------------------------------------------------------------
+.cc-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--cc-space-1);
+  height: 24px;
+  padding: 0 10px;
+  border-radius: var(--cc-radius-full);
+  font-size: var(--cc-fs-xs);
+  font-weight: var(--cc-fw-semibold);
+  background: var(--cc-surface-2);
+  color: var(--cc-text-2);
+  white-space: nowrap;
+
+  .material-symbols-outlined { font-size: 16px; }
+
+  &--success { background: var(--cc-success-soft); color: var(--cc-success); }
+  &--warning { background: var(--cc-warning-soft); color: var(--cc-warning); }
+  &--danger { background: var(--cc-danger-soft); color: var(--cc-danger); }
+  &--info { background: var(--cc-info-soft); color: var(--cc-info); }
+  &--primary { background: var(--cc-primary-soft); color: var(--cc-primary); }
+}
+
+// Chip de categoría: el color viene por variable inline desde el componente
+//   <span class="cc-chip" [style.--cc-chip-color]="cat.color">
+.cc-chip {
+  --cc-chip-color: var(--cc-text-2);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px 0 6px;
+  border-radius: var(--cc-radius-full);
+  font-size: var(--cc-fs-sm);
+  font-weight: var(--cc-fw-medium);
+  color: var(--cc-text);
+  background: color-mix(in srgb, var(--cc-chip-color) 14%, var(--cc-surface));
+  border: 1px solid color-mix(in srgb, var(--cc-chip-color) 30%, transparent);
+
+  .material-symbols-outlined {
+    font-size: 18px;
+    color: var(--cc-chip-color);
+  }
+
+  &.is-selected {
+    background: var(--cc-chip-color);
+    border-color: var(--cc-chip-color);
+    color: #fff;
+
+    .material-symbols-outlined { color: #fff; }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Barra de progreso (presupuestos, metas, cuotas)
+//   <div class="cc-progress" [class]="'is-' + level"><div class="cc-progress__bar" [style.width.%]="pct"></div></div>
+// -----------------------------------------------------------------------------
+.cc-progress {
+  --cc-progress-color: var(--cc-primary);
+  height: 8px;
+  border-radius: var(--cc-radius-full);
+  background: var(--cc-surface-2);
+  overflow: hidden;
+
+  &__bar {
+    height: 100%;
+    max-width: 100%;
+    border-radius: inherit;
+    background: var(--cc-progress-color);
+    transition: width var(--cc-dur-slow) var(--cc-ease);
+  }
+
+  &--lg { height: 12px; }
+
+  &.is-ok { --cc-progress-color: var(--cc-success); }
+  &.is-warning { --cc-progress-color: var(--cc-warning); }
+  &.is-reached { --cc-progress-color: var(--cc-accent); }
+  &.is-exceeded { --cc-progress-color: var(--cc-danger); }
+}
+
+// -----------------------------------------------------------------------------
+// Skeleton (estado de carga). Mismo tamaño que el contenido real.
+// -----------------------------------------------------------------------------
+@keyframes cc-shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+.cc-skeleton {
+  display: block;
+  border-radius: var(--cc-radius-sm);
+  background: linear-gradient(90deg, var(--cc-skeleton-base) 0px, var(--cc-skeleton-shine) 40%, var(--cc-skeleton-base) 80%);
+  background-size: 800px 100%;
+  animation: cc-shimmer 1.4s ease-in-out infinite;
+  min-height: 1em;
+
+  &--text { height: 0.9em; width: 60%; }
+  &--title { height: 1.4em; width: 40%; }
+  &--amount { height: 2em; width: 50%; }
+  &--circle { width: 40px; height: 40px; border-radius: var(--cc-radius-full); }
+  &--card { height: 120px; border-radius: var(--cc-radius-lg); }
+  &--row { height: 64px; border-radius: 0; }
+}
+
+// -----------------------------------------------------------------------------
+// Empty state
+// -----------------------------------------------------------------------------
+.cc-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--cc-space-3);
+  padding: var(--cc-space-10) var(--cc-space-4);
+  color: var(--cc-text-2);
+
+  &__icon {
+    width: 72px;
+    height: 72px;
+    border-radius: var(--cc-radius-xl);
+    display: grid;
+    place-items: center;
+    background: var(--cc-primary-soft);
+    color: var(--cc-primary);
+
+    .material-symbols-outlined { font-size: 36px; }
+  }
+
+  &__title {
+    font-size: var(--cc-fs-lg);
+    font-weight: var(--cc-fw-semibold);
+    color: var(--cc-text);
+  }
+
+  &__text {
+    max-width: 36ch;
+    font-size: var(--cc-fs-sm);
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Banner in-app (alertas de presupuesto, sobrante sin asignar, offline)
+// -----------------------------------------------------------------------------
+.cc-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--cc-space-3);
+  padding: var(--cc-space-3) var(--cc-space-4);
+  border-radius: var(--cc-radius-md);
+  background: var(--cc-info-soft);
+  color: var(--cc-text);
+  border: 1px solid color-mix(in srgb, var(--cc-info) 25%, transparent);
+  font-size: var(--cc-fs-sm);
+
+  .material-symbols-outlined { color: var(--cc-info); flex-shrink: 0; }
+
+  &__text { flex: 1; min-width: 0; }
+
+  &--warning {
+    background: var(--cc-warning-soft);
+    border-color: color-mix(in srgb, var(--cc-warning) 25%, transparent);
+    .material-symbols-outlined { color: var(--cc-warning); }
+  }
+  &--danger {
+    background: var(--cc-danger-soft);
+    border-color: color-mix(in srgb, var(--cc-danger) 25%, transparent);
+    .material-symbols-outlined { color: var(--cc-danger); }
+  }
+  &--success {
+    background: var(--cc-success-soft);
+    border-color: color-mix(in srgb, var(--cc-success) 25%, transparent);
+    .material-symbols-outlined { color: var(--cc-success); }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Grilla de "elegir día del mes" (service-form-dialog M-08, reusada por
+// accept-suggestion-dialog M-18) - ver nota en workspace-shell/PROJECT_STATE.
+// -----------------------------------------------------------------------------
+.cc-day-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: var(--cc-space-1);
+  max-width: 280px;
+  padding: var(--cc-space-2);
+}
+
+.cc-day-grid__day {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--cc-border);
+  border-radius: var(--cc-radius-sm);
+  background: var(--cc-surface);
+  color: var(--cc-text);
+  font-size: var(--cc-fs-sm);
+  cursor: pointer;
+
+  &:hover { background: var(--cc-surface-hover); }
+
+  &.is-selected {
+    background: var(--cc-primary);
+    border-color: var(--cc-primary);
+    color: var(--cc-on-primary);
+  }
+}
+
+.cc-day-grid__clear {
+  border: none;
+  background: none;
+  color: var(--cc-primary);
+  font-size: var(--cc-fs-sm);
+  cursor: pointer;
+  text-align: left;
+  padding: var(--cc-space-2);
+}
+
+// -----------------------------------------------------------------------------
+// Animación de entrada para listas y tarjetas (sutil)
+// -----------------------------------------------------------------------------
+@keyframes cc-fade-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.cc-fade-up {
+  animation: cc-fade-up var(--cc-dur-slow) var(--cc-ease) both;
+}

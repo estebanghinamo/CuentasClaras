@@ -1,0 +1,43 @@
+<section class="cc-page">
+  <header class="cc-page__header">
+    <div class="cc-page__title">
+      <h1 class="cc-h1">Actividad reciente</h1>
+    </div>
+  </header>
+
+  <div class="cc-stack cc-zebra-list">
+    @if (items().length === 0 && !loading()) {
+      <div class="cc-card">
+        <p>Todavía no hay actividad registrada en este espacio.</p>
+      </div>
+    }
+
+    @for (entry of items(); track entry.id) {
+      <button
+        type="button"
+        class="cc-card cc-activity-row"
+        [style.--cc-activity-row-color]="userColor(entry.user_id)"
+        (click)="openDetail(entry)"
+      >
+        <span class="cc-activity-row__avatar">{{ userInitial(entry.user_name) }}</span>
+        <span class="cc-activity-row__main">
+          <span class="cc-activity-row__summary">{{ actionLabel(entry.action) }} — {{ entry.summary }}</span>
+          <span class="cc-caption">{{ entry.user_name }} · {{ formatDate(entry.created_at) }}</span>
+        </span>
+        <span class="material-symbols-outlined cc-activity-row__chevron">chevron_right</span>
+      </button>
+    }
+
+    @if (meta() && meta()!.page < meta()!.last_page) {
+      <div class="cc-form__actions">
+        <button mat-stroked-button (click)="loadMore()" [disabled]="loading()">
+          @if (loading()) {
+            <app-spinner [size]="20" />
+          } @else {
+            Cargar más
+          }
+        </button>
+      </div>
+    }
+  </div>
+</section>

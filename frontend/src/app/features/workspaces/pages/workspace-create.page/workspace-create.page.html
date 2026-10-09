@@ -1,0 +1,50 @@
+<section class="cc-page">
+  <header class="cc-page__header">
+    <div class="cc-page__title">
+      <h1 class="cc-h1">Crear espacio</h1>
+    </div>
+  </header>
+
+  <div class="cc-card">
+    <form class="cc-form" [formGroup]="form" (ngSubmit)="submit()">
+
+      <mat-form-field class="cc-form__full" appearance="outline">
+        <mat-label>Nombre</mat-label>
+        <input matInput formControlName="name" />
+        @if (serverFieldError('name'); as message) {
+          <mat-error>{{ message }}</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Moneda</mat-label>
+        <mat-select formControlName="currency">
+          @for (currency of currencies; track currency) {
+            <mat-option [value]="currency">{{ currency }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Tipo</mat-label>
+        <mat-select formControlName="type">
+          @for (option of typeOptions; track option.value) {
+            <mat-option [value]="option.value">{{ option.label }}</mat-option>
+          }
+        </mat-select>
+        <mat-hint>{{ selectedTypeHint() }}</mat-hint>
+      </mat-form-field>
+
+      <div class="cc-form__full cc-form__actions">
+        <a mat-stroked-button routerLink="/workspaces">Cancelar</a>
+        <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || loading()">
+          @if (loading()) {
+            <app-spinner [size]="20" />
+          } @else {
+            Crear
+          }
+        </button>
+      </div>
+    </form>
+  </div>
+</section>

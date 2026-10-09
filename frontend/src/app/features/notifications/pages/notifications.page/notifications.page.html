@@ -1,0 +1,49 @@
+<section class="cc-page">
+  <header class="cc-page__header">
+    <div class="cc-page__title cc-page__title--with-back">
+      <button mat-icon-button class="cc-page__back" (click)="goBack()" aria-label="Volver">
+        <span class="material-symbols-outlined">arrow_back</span>
+      </button>
+      <h1 class="cc-h1">Notificaciones</h1>
+    </div>
+    @if (notificationService.unreadCount() > 0) {
+      <div class="cc-page__actions">
+        <button mat-stroked-button (click)="markAllRead()">Marcar todas leídas</button>
+      </div>
+    }
+  </header>
+
+  <div class="cc-stack">
+    @if (items().length === 0 && !loading()) {
+      <div class="cc-card">
+        <p>Todavía no tenés notificaciones.</p>
+      </div>
+    }
+
+    @for (item of items(); track item.id) {
+      <button type="button" class="cc-card cc-notification-row" [class.is-unread]="!item.read_at" (click)="open(item)">
+        <span class="material-symbols-outlined cc-notification-row__icon">{{ typeIcon(item.type) }}</span>
+        <span class="cc-notification-row__main">
+          <strong>{{ item.title }}</strong>
+          <span class="cc-caption">{{ item.body }}</span>
+          <span class="cc-caption">{{ item.created_at | date: 'short' }}</span>
+        </span>
+        @if (!item.read_at) {
+          <span class="cc-notification-row__dot" aria-hidden="true"></span>
+        }
+      </button>
+    }
+
+    @if (meta() && meta()!.page < meta()!.last_page) {
+      <div class="cc-form__actions">
+        <button mat-stroked-button (click)="loadMore()" [disabled]="loading()">
+          @if (loading()) {
+            <app-spinner [size]="20" />
+          } @else {
+            Cargar más
+          }
+        </button>
+      </div>
+    }
+  </div>
+</section>

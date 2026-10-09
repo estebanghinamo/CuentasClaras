@@ -1,0 +1,48 @@
+<h2 mat-dialog-title>{{ data.installment.description }}</h2>
+
+<mat-dialog-content class="cc-stack">
+  <div class="cc-installment-detail__summary">
+    <div><span>Total</span><strong>{{ data.installment.total_amount | currency: context.membership()?.currency : 'symbol-narrow' : '1.2-2' }}</strong></div>
+    <div><span>Cuota</span><strong>{{ data.installment.installment_amount | currency: context.membership()?.currency : 'symbol-narrow' : '1.2-2' }}</strong></div>
+    <div><span>Restante</span><strong>{{ data.installment.remaining_amount | currency: context.membership()?.currency : 'symbol-narrow' : '1.2-2' }}</strong></div>
+  </div>
+
+  <div class="cc-installment-detail__progress">
+    <div>
+      <span>{{ data.installment.paid_count }} de {{ data.installment.installments_count }} pagadas</span>
+      <strong>{{ progress() }}%</strong>
+    </div>
+    <div class="cc-installment-detail__track"><span [style.width.%]="progress()"></span></div>
+  </div>
+
+  <ul class="cc-stack cc-stack--sm">
+    @for (payment of payments(); track payment.id) {
+      <li class="cc-installment-detail__payment">
+        <div>
+          <strong>Cuota {{ payment.number }}</strong>
+          <span>{{ monthLabel(payment.month) }} {{ payment.year }} · {{ payment.amount | currency: context.membership()?.currency : 'symbol-narrow' : '1.2-2' }}</span>
+        </div>
+        @if (data.installment.can_edit) {
+          @if (payment.status === 'pending') {
+            <div class="cc-installment-detail__pay-action">
+              <button mat-flat-button color="primary" [disabled]="saving() || !canPay(payment)" (click)="pay(payment)">
+                @if (saving()) { <app-spinner [size]="18" /> } @else { Pagar }
+              </button>
+              @if (!canPay(payment)) {
+                <span class="cc-caption">Pagá antes la cuota {{ firstUnpaidNumber() }}</span>
+              }
+            </div>
+          } @else {
+            <button mat-stroked-button [disabled]="saving()" (click)="unpay(payment)">Deshacer</button>
+          }
+        } @else {
+          <span class="cc-caption">Pagada</span>
+        }
+      </li>
+    }
+  </ul>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button mat-dialog-close>Cerrar</button>
+</mat-dialog-actions>

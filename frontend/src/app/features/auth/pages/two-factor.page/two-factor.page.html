@@ -1,0 +1,32 @@
+<app-auth-layout title="Verificación en dos pasos">
+  <p class="cc-caption">
+    Abrí Google Authenticator (u otra app de autenticación) en tu celular e ingresá el código de 6 dígitos que
+    te muestra para esta cuenta. Si no tenés acceso a la app, podés usar uno de tus códigos de recuperación.
+  </p>
+
+  <form class="cc-form" [formGroup]="form" (ngSubmit)="submit()">
+    @if (errorMessage()) {
+      <div class="cc-form__full cc-banner cc-banner--danger">
+        <span class="material-symbols-outlined">error</span>
+        <span class="cc-banner__text">{{ errorMessage() }}</span>
+      </div>
+    }
+
+    <mat-form-field class="cc-form__full" appearance="outline">
+      <mat-label>Código de la app o de recuperación</mat-label>
+      <span class="material-symbols-outlined" matPrefix>pin</span>
+      <input matInput formControlName="code" autocomplete="one-time-code" inputmode="numeric" />
+      <mat-hint>Código de 6 dígitos de la app, o código de recuperación de 10 caracteres.</mat-hint>
+    </mat-form-field>
+
+    <div class="cc-form__full cc-form__actions cc-form__actions--center">
+      <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || loading()">
+        @if (loading()) {
+          <app-spinner [size]="20" />
+        } @else {
+          Verificar
+        }
+      </button>
+    </div>
+  </form>
+</app-auth-layout>

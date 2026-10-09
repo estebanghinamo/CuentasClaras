@@ -1,0 +1,35 @@
+<app-auth-layout title="Invitación a un espacio">
+  @if (loading()) {
+    <app-spinner [size]="32" />
+  } @else if (errorMessage()) {
+    <div class="cc-banner cc-banner--danger">
+      <span class="material-symbols-outlined">error</span>
+      <span class="cc-banner__text">{{ errorMessage() }}</span>
+    </div>
+    <div class="cc-auth__links">
+      <a routerLink="/workspaces">Ir a mis espacios</a>
+    </div>
+  } @else if (preview(); as invitation) {
+    <p class="cc-caption">
+      <strong>{{ invitation.invited_by_name }}</strong> te invitó a unirte a
+      <strong>{{ invitation.workspace_name }}</strong> ({{ typeLabel(invitation.workspace_type) }}).
+    </p>
+    <p class="cc-caption">Al aceptar, vas a pasar a ser miembro de este espacio y vas a ver sus datos.</p>
+
+    @if (hasSession()) {
+      <button mat-flat-button color="primary" (click)="accept()" [disabled]="accepting()">
+        @if (accepting()) {
+          <app-spinner [size]="20" />
+        } @else {
+          Aceptar invitación
+        }
+      </button>
+    } @else {
+      <p class="cc-caption">Iniciá sesión o creá una cuenta para aceptar la invitación.</p>
+      <a mat-flat-button color="primary" [routerLink]="['/auth/login']" [queryParams]="returnUrlParams()">
+        Iniciar sesión
+      </a>
+      <a mat-stroked-button [routerLink]="['/auth/register']" [queryParams]="returnUrlParams()">Crear cuenta</a>
+    }
+  }
+</app-auth-layout>

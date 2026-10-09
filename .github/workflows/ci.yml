@@ -1,0 +1,287 @@
+# Corre los tests de backend (PHPUnit contra MySQL/Redis de servicio) y frontend
+# (ng build + ng test) en cada push y pull_request contra main. main tiene
+# branch protection: requiere PR + estos dos checks en verde para mergear.
+#
+# Desde ADR-004, backend y frontend corren nativos en desarrollo (no en Docker) -
+# este job hace lo mismo: PHP nativo (setup-php) + MySQL/Redis como "service
+# containers" propios de GitHub Actions, expuestos en localhost del runner igual
+# que docker-compose.yml los expone en desarrollo. backend/.env.example y
+# phpunit.xml ya apuntan a 127.0.0.1 por default, asi que no hace falta ningun
+# sed para adaptar hosts entre entornos.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  gitleaks:
+    # Escanea todo el historial del repo (fetch-depth: 0) en busca de secretos
+    # hardcodeados (API keys, tokens, credenciales) commiteados por error, no
+    # solo en el diff del PR. Independiente de los demas jobs - no depende de
+    # backend/frontend ni ellos de este.
+    name: Gitleaks (secretos hardcodeados)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # gitleaks-action llama a la API de Pulls para listar los commits del
+      # PR - el default de GITHUB_TOKEN en este repo no incluye este scope,
+      # y sin el la action explota con 403 "Resource not accessible by
+      # integration" antes de llegar a escanear nada.
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Gitleaks scan
+        uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  backend:
+    name: Backend (PHPUnit)
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root_dev_password
+          MYSQL_DATABASE: cuentas_claras
+          MYSQL_USER: cuentas_claras
+          MYSQL_PASSWORD: cuentas_claras_dev_password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -uroot -proot_dev_password"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+      redis:
+        image: redis:alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Instalar PHP
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
+        with:
+          php-version: "8.2"
+          extensions: mbstring, bcmath, pdo_mysql, zip, gd, intl, pcntl, pcov
+          coverage: pcov
+          tools: composer:v2
+
+      - name: Crear backend/.env
+        # MAIL_FROM_ADDRESS en .env.example depende de MAIL_USERNAME, que
+        # esta vacio ahi (en dev local se completa con credenciales reales
+        # de Gmail) - sin un From valido, Symfony Mailer rechaza CUALQUIER
+        # mail que se arme (aunque MAIL_MAILER=array via phpunit.xml nunca
+        # lo entregue de verdad), rompiendo tests que disparan un mail
+        # queued (ej. invitaciones) porque QUEUE_CONNECTION=sync lo corre
+        # en el mismo request. DB_HOST/REDIS_HOST quedan en 127.0.0.1 tal
+        # cual trae .env.example - los "services" de este job publican sus
+        # puertos en localhost del runner, igual que docker-compose.yml en dev.
+        run: |
+          cp backend/.env.example backend/.env
+          sed -i 's/^MAIL_FROM_ADDRESS=.*/MAIL_FROM_ADDRESS="ci@example.com"/' backend/.env
+
+      - name: Crear base cuentas_claras_test y aplicar schema.sql
+        run: |
+          mysql -h127.0.0.1 -uroot -proot_dev_password -e "
+            CREATE DATABASE IF NOT EXISTS cuentas_claras_test;
+            GRANT ALL PRIVILEGES ON cuentas_claras_test.* TO 'cuentas_claras'@'%';
+            FLUSH PRIVILEGES;
+          "
+          mysql -h127.0.0.1 -uroot -proot_dev_password cuentas_claras_test < db/schema.sql
+
+      - name: Instalar dependencias de Composer
+        working-directory: backend
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Generar APP_KEY
+        working-directory: backend
+        run: php artisan key:generate
+
+      - name: Analisis estatico (PHPStan/Larastan)
+        working-directory: backend
+        run: vendor/bin/phpstan analyse --no-progress
+
+      - name: Auditoria de dependencias (composer audit)
+        working-directory: backend
+        run: composer audit
+
+      - name: Correr tests de backend (PHPUnit / cuentas_claras_test) con cobertura
+        working-directory: backend
+        run: php artisan test --coverage-clover=coverage/clover.xml
+
+      - name: Subir reporte de cobertura (backend)
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: backend-coverage
+          path: backend/coverage/clover.xml
+          retention-days: 1
+
+  frontend:
+    name: Frontend (build + tests)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Instalar dependencias
+        working-directory: frontend
+        run: npm ci
+
+      - name: Compilar (ng build)
+        working-directory: frontend
+        run: npm run build
+
+      - name: Analisis estatico (ESLint / angular-eslint)
+        working-directory: frontend
+        run: npx ng lint
+
+      # audit-level=high: quedan 3 vulnerabilidades moderadas sin fix en la
+      # linea 8.x, transitivas de @capacitor/cli -> xcode -> uuid. xcode solo
+      # aplica a compilar iOS, que este proyecto todavia no soporta (pending
+      # en PROJECT_STATE.json). Se aceptan moderate documentadas; high/critical
+      # siguen bloqueando el build.
+      - name: Auditoria de dependencias (npm audit)
+        working-directory: frontend
+        run: npm audit --audit-level=high
+
+      - name: Correr tests unitarios (ng test, ChromeHeadless) con cobertura
+        working-directory: frontend
+        run: npx ng test --no-watch --no-progress --browsers=ChromeHeadless --code-coverage
+
+      - name: Subir reporte de cobertura (frontend)
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: frontend-coverage
+          path: frontend/coverage/frontend/lcov.info
+          retention-days: 1
+
+  zap-baseline:
+    # Baseline scan (pasivo, no ataque activo): DAST solo sobre la superficie
+    # publica/anonima del backend (login, registro, health checks, etc.) -
+    # no hay contexto de auth configurado, asi que no ve rutas detras de
+    # auth:sanctum. Informativo por ahora (no bloquea el build); si se decide
+    # escalar a escaneo autenticado, es tarea aparte.
+    name: OWASP ZAP Baseline Scan
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root_dev_password
+          MYSQL_DATABASE: cuentas_claras
+          MYSQL_USER: cuentas_claras
+          MYSQL_PASSWORD: cuentas_claras_dev_password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -uroot -proot_dev_password"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+      redis:
+        image: redis:alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Instalar PHP
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
+        with:
+          php-version: "8.2"
+          extensions: mbstring, bcmath, pdo_mysql, zip, gd, intl, pcntl
+          tools: composer:v2
+
+      - name: Crear backend/.env
+        # A diferencia del job "backend", aca no hay phpunit.xml que
+        # sobreescriba DB_DATABASE - se fija explicito a cuentas_claras_test
+        # (nunca la real) para que "php artisan serve" arranque contra ella.
+        run: |
+          cp backend/.env.example backend/.env
+          sed -i 's/^MAIL_FROM_ADDRESS=.*/MAIL_FROM_ADDRESS="ci@example.com"/' backend/.env
+          sed -i 's/^DB_DATABASE=.*/DB_DATABASE=cuentas_claras_test/' backend/.env
+
+      - name: Crear base cuentas_claras_test y aplicar schema.sql
+        run: |
+          mysql -h127.0.0.1 -uroot -proot_dev_password -e "
+            CREATE DATABASE IF NOT EXISTS cuentas_claras_test;
+            GRANT ALL PRIVILEGES ON cuentas_claras_test.* TO 'cuentas_claras'@'%';
+            FLUSH PRIVILEGES;
+          "
+          mysql -h127.0.0.1 -uroot -proot_dev_password cuentas_claras_test < db/schema.sql
+
+      - name: Instalar dependencias de Composer
+        working-directory: backend
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Generar APP_KEY
+        working-directory: backend
+        run: php artisan key:generate
+
+      - name: Levantar backend (php artisan serve) en background
+        working-directory: backend
+        run: |
+          nohup php artisan serve --host=127.0.0.1 --port=8000 > serve.log 2>&1 &
+          for i in $(seq 1 30); do
+            curl -sf http://127.0.0.1:8000/api/metrics > /dev/null && exit 0
+            sleep 1
+          done
+          echo "El backend no respondio a tiempo"; cat serve.log; exit 1
+
+      - name: ZAP Baseline Scan
+        uses: zaproxy/action-baseline@de8ad967d3548d44ef623df22cf95c3b0baf8b25 # v0.15.0
+        with:
+          target: "http://127.0.0.1:8000"
+          fail_action: false
+          allow_issue_writing: false
+
+  sonarqube:
+    name: SonarQube Cloud
+    runs-on: ubuntu-latest
+    needs: [backend, frontend]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # SonarQube Cloud necesita el historial completo (no un shallow
+          # clone) para calcular "new code" y blame de issues.
+          fetch-depth: 0
+
+      - name: Descargar cobertura de backend
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: backend-coverage
+          path: backend/coverage
+
+      - name: Descargar cobertura de frontend
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: frontend-coverage
+          path: frontend/coverage/frontend
+
+      - name: SonarQube Cloud Scan
+        uses: SonarSource/sonarqube-scan-action@ba9859eae8dd6bd29e412f25ddbbef3d032000f4 # v8.2.2
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

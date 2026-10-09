@@ -1,0 +1,17 @@
+.cc-loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--cc-z-overlay);
+  display: grid;
+  place-items: center;
+  background: var(--cc-overlay);
+
+  &__panel {
+    display: grid;
+    place-items: center;
+    padding: var(--cc-space-6);
+    border-radius: var(--cc-radius-lg);
+    background: var(--cc-surface);
+    box-shadow: var(--cc-shadow-3);
+  }
+}

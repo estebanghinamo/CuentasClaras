@@ -1,0 +1,49 @@
+<div class="cc-shell">
+  <aside class="cc-sidenav">
+    <div class="cc-sidenav__brand">Cuentas Claras</div>
+
+    <nav class="cc-sidenav__group" aria-label="Navegación principal">
+      <a class="cc-nav-item" routerLink="/workspaces" routerLinkActive="is-active" [routerLinkActiveOptions]="{ exact: false }">
+        <span class="material-symbols-outlined">workspaces</span>
+        Mis espacios
+      </a>
+      <a class="cc-nav-item" routerLink="/profile" routerLinkActive="is-active">
+        <span class="material-symbols-outlined">person</span>
+        Perfil
+      </a>
+    </nav>
+
+    <div style="flex: 1"></div>
+
+    <div class="cc-sidenav__user">
+      <div class="cc-sidenav__user-avatar">{{ userInitials() }}</div>
+      <div class="cc-sidenav__user-info">
+        <strong>{{ authService.currentUser()?.name }}</strong>
+        <span class="cc-caption">{{ authService.currentUser()?.email }}</span>
+      </div>
+      <button mat-icon-button (click)="logout()" aria-label="Cerrar sesión" matTooltip="Cerrar sesión">
+        <span class="material-symbols-outlined">logout</span>
+      </button>
+    </div>
+  </aside>
+
+  <header class="cc-topbar">
+    <span class="cc-h1">Cuentas Claras</span>
+    <app-notification-bell class="cc-topbar__bell" />
+  </header>
+
+  <main class="cc-content">
+    <router-outlet />
+  </main>
+
+  <nav class="cc-bottomnav" aria-label="Navegación móvil">
+    <a class="cc-bottomnav__item" routerLink="/workspaces" routerLinkActive="is-active">
+      <span class="material-symbols-outlined">workspaces</span>
+      Espacios
+    </a>
+    <a class="cc-bottomnav__item" routerLink="/profile" routerLinkActive="is-active">
+      <span class="material-symbols-outlined">person</span>
+      Perfil
+    </a>
+  </nav>
+</div>

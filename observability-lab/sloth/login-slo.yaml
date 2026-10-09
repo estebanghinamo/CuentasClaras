@@ -1,0 +1,64 @@
+# SLO para POST /api/auth/login, en formato nativo de Sloth
+# (https://sloth.dev), que es el generador que produce las reglas de
+# Prometheus a partir de esta definición.
+#
+# Nota sobre OpenSLO: la idea original era escribir esto directamente en el
+# formato OpenSLO (spec.openslo.com), ya que es el estándar más neutral/portable
+# entre herramientas. En la práctica, la versión de Sloth usada acá
+# (slok/sloth:latest) no logró parsear el YAML de OpenSLO probado
+# ("invalid spec, could not load with any of the supported spec types"), así
+# que se usa el formato nativo de Sloth, que es 100% soportado y expresa
+# exactamente los mismos conceptos (SLI, objective, error budget, ventana).
+# El README explica cómo migrar esto a OpenSLO real si en el futuro se quiere
+# usar otra herramienta que sí lo soporte de forma estable.
+version: prometheus/v1
+service: cuentasclaras-backend
+labels:
+  team: cuentasclaras
+slos:
+  - name: login-availability
+    objective: 99
+    description: "El login debe responder sin error de servidor el 99% de las veces."
+    labels:
+      category: availability
+    sli:
+      events:
+        error_query: sum(rate(app_http_requests_total{route="api/auth/login", status=~"5.."}[{{.window}}]))
+        total_query: sum(rate(app_http_requests_total{route="api/auth/login"}[{{.window}}]))
+    alerting:
+      name: LoginHighErrorRate
+      labels:
+        severity: warning
+      annotations:
+        summary: "El login está por debajo del 99% de disponibilidad."
+      page_alert:
+        labels:
+          severity: page
+      ticket_alert:
+        labels:
+          severity: ticket
+
+  - name: login-latency
+    objective: 95
+    description: "El 95% de los logins debe responder en menos de 500ms."
+    labels:
+      category: latency
+    sli:
+      events:
+        error_query: >-
+          sum(rate(app_http_request_duration_seconds_count{route="api/auth/login"}[{{.window}}]))
+          -
+          sum(rate(app_http_request_duration_seconds_bucket{route="api/auth/login", le="0.5"}[{{.window}}]))
+        total_query: sum(rate(app_http_request_duration_seconds_count{route="api/auth/login"}[{{.window}}]))
+    alerting:
+      name: LoginHighLatency
+      labels:
+        severity: warning
+      annotations:
+        summary: "El login está respondiendo más lento de lo esperado (objetivo: 95% < 500ms)."
+      page_alert:
+        labels:
+          severity: page
+      ticket_alert:
+        labels:
+          severity: ticket

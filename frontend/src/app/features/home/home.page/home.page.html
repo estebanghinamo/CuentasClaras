@@ -1,0 +1,64 @@
+<section class="cc-page">
+  <header class="cc-page__header">
+    <div class="cc-page__title">
+      <h1 class="cc-h1">Hola{{ userName() ? ', ' + userName() : '' }} 👋</h1>
+      <p class="cc-caption">Elegí un espacio para ver sus finanzas.</p>
+    </div>
+  </header>
+
+  @if (invitations().length > 0) {
+    <div class="cc-card cc-banner">
+      <span class="material-symbols-outlined">mail</span>
+      <div class="cc-stack cc-stack--sm" style="flex: 1">
+        @for (invitation of invitations(); track invitation.code) {
+          <div class="cc-cluster">
+            <span>
+              <strong>{{ invitation.workspace_name }}</strong>
+              ({{ typeLabel(invitation.workspace_type) }}) — invitado por {{ invitation.invited_by_name }}
+            </span>
+            <button
+              mat-flat-button
+              color="primary"
+              (click)="accept(invitation)"
+              [disabled]="accepting() === invitation.code"
+            >
+              Aceptar
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <div class="cc-page__header">
+    <div class="cc-page__title">
+      <h2 class="cc-h1" style="font-size: var(--cc-fs-lg)">Tus espacios</h2>
+    </div>
+    <div class="cc-page__actions">
+      <a mat-stroked-button routerLink="/workspaces/create">
+        <span class="material-symbols-outlined">add</span>
+        Nuevo espacio
+      </a>
+    </div>
+  </div>
+
+  @if (context.workspaces().length === 0) {
+    <div class="cc-card cc-workspace-empty">
+      <span class="material-symbols-outlined cc-workspace-empty__icon">apps</span>
+      <p>Todavía no tenés espacios. Creá uno para empezar a registrar movimientos.</p>
+      <a mat-flat-button color="primary" routerLink="/workspaces/create">Crear mi primer espacio</a>
+    </div>
+  } @else {
+    <div class="cc-grid">
+      @for (workspace of context.workspaces(); track workspace.id) {
+        <app-workspace-card [workspace]="workspace" />
+      }
+    </div>
+  }
+
+  <a class="cc-card cc-card--interactive" routerLink="/profile" style="max-width: 320px">
+    <span class="material-symbols-outlined" style="font-size: 28px; color: var(--cc-primary)">person</span>
+    <div class="cc-card__header">Perfil</div>
+    <p class="cc-caption">Datos de tu cuenta, contraseña y verificación en dos pasos.</p>
+  </a>
+</section>

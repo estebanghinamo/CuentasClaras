@@ -1,0 +1,53 @@
+// Píldora única "‹ Sep 2026 ›": las 3 piezas comparten un mismo fondo/borde
+// redondeado en vez de ser 3 controles sueltos con su propio borde cuadrado
+// (version anterior, se veía desarmada en mobile).
+.cc-month-picker {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 100%;
+  border: 1px solid var(--cc-border);
+  border-radius: var(--cc-radius-full);
+  background: var(--cc-surface);
+  padding: var(--cc-space-1);
+
+  @media (min-width: 600px) {
+    width: auto;
+  }
+}
+
+.cc-month-picker__arrow {
+  flex-shrink: 0;
+
+  .material-symbols-outlined {
+    display: block;
+  }
+}
+
+.cc-month-picker__trigger {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--cc-space-2);
+  white-space: nowrap;
+  height: 40px;
+  padding-inline: var(--cc-space-3);
+  border: none;
+  border-radius: var(--cc-radius-full);
+  background: transparent;
+  color: var(--cc-text);
+  font: inherit;
+  font-weight: var(--cc-fw-semibold);
+  cursor: pointer;
+  transition: background var(--cc-dur-fast) var(--cc-ease);
+
+  .material-symbols-outlined {
+    color: var(--cc-primary);
+    font-size: 20px;
+  }
+
+  &:hover {
+    background: var(--cc-surface-hover);
+  }
+}

@@ -1,0 +1,33 @@
+<section class="cc-page">
+  <header class="cc-page__header">
+    <div class="cc-page__title">
+      <h1 class="cc-h1">Tus espacios</h1>
+      <p class="cc-caption">Cada espacio es un conjunto de finanzas independiente</p>
+    </div>
+    <div class="cc-page__actions">
+      <a mat-flat-button color="primary" routerLink="/workspaces/create">
+        <span class="material-symbols-outlined">add</span>
+        Nuevo espacio
+      </a>
+    </div>
+  </header>
+
+  @if (context.workspaces().length === 0) {
+    <div class="cc-card cc-workspace-empty">
+      <span class="material-symbols-outlined cc-workspace-empty__icon">apps</span>
+      <p>Todavía no tenés espacios. Creá uno o pedile a quien te invitó el link de invitación.</p>
+      <a mat-flat-button color="primary" routerLink="/workspaces/create">Crear mi primer espacio</a>
+    </div>
+  } @else {
+    <div class="cc-grid">
+      @for (workspace of context.workspaces(); track workspace.id) {
+        <app-workspace-card
+          [workspace]="workspace"
+          [showRole]="true"
+          [showInvite]="true"
+          (invite)="openInvite($event, workspace)"
+        />
+      }
+    </div>
+  }
+</section>

@@ -1,0 +1,233 @@
+// =============================================================================
+// Cuentas Claras — Design tokens
+// Fuente única de verdad de color, tipografía, espaciado, radios, sombras,
+// layout y movimiento. Ver ESPECIFICACION_TECNICA.md, capítulo D.
+//
+// Regla: ningún componente escribe un color, tamaño o sombra "a mano".
+// Siempre var(--cc-*) o las funciones/mixins de este archivo.
+// =============================================================================
+
+// -----------------------------------------------------------------------------
+// Breakpoints (SCSS, para media queries en componentes)
+//   xs: < 600   teléfono
+//   sm: 600–959 teléfono grande / tablet vertical
+//   md: 960–1279 tablet horizontal / laptop chica  → aparece el sidenav
+//   lg: ≥ 1280  desktop
+// -----------------------------------------------------------------------------
+$cc-bp-sm: 600px;
+$cc-bp-md: 960px;
+$cc-bp-lg: 1280px;
+
+@mixin up($bp) {
+  @if $bp == sm { @media (min-width: $cc-bp-sm) { @content; } }
+  @else if $bp == md { @media (min-width: $cc-bp-md) { @content; } }
+  @else if $bp == lg { @media (min-width: $cc-bp-lg) { @content; } }
+  @else { @error "Breakpoint desconocido: #{$bp}"; }
+}
+
+@mixin down($bp) {
+  @if $bp == sm { @media (max-width: ($cc-bp-sm - 1px)) { @content; } }
+  @else if $bp == md { @media (max-width: ($cc-bp-md - 1px)) { @content; } }
+  @else if $bp == lg { @media (max-width: ($cc-bp-lg - 1px)) { @content; } }
+  @else { @error "Breakpoint desconocido: #{$bp}"; }
+}
+
+// -----------------------------------------------------------------------------
+// Tokens de tema oscuro (se aplican con la clase .dark-theme en <html> o con
+// prefers-color-scheme cuando no hay clase explícita)
+// -----------------------------------------------------------------------------
+@mixin dark-tokens {
+  color-scheme: dark;
+
+  --cc-primary: #5b8def;
+  --cc-primary-hover: #82a9f2;
+  --cc-primary-soft: rgba(91, 141, 239, 0.16);
+  --cc-on-primary: #0a1730;
+  --cc-accent: #d4af37;
+  --cc-accent-soft: rgba(212, 175, 55, 0.16);
+  --cc-on-accent: #241d05;
+
+  --cc-success: #4ade80;
+  --cc-success-soft: rgba(74, 222, 128, 0.14);
+  --cc-warning: #fbbf24;
+  --cc-warning-soft: rgba(251, 191, 36, 0.14);
+  --cc-danger: #f87171;
+  --cc-danger-soft: rgba(248, 113, 113, 0.14);
+  --cc-info: #60a5fa;
+  --cc-info-soft: rgba(96, 165, 250, 0.14);
+
+  --cc-bg: #0b1220;
+  --cc-surface: #131b2b;
+  --cc-surface-2: #1a2436;
+  --cc-surface-hover: #1f2a3f;
+  --cc-border: #263247;
+  --cc-divider: #1e293b;
+
+  --cc-text: #e5e9f0;
+  --cc-text-2: #9aa7ba;
+  --cc-text-3: #6b7a90;
+  --cc-text-disabled: #3f4b5e;
+
+  --cc-income: #4ade80;
+  --cc-expense: #f87171;
+
+  --cc-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.5);
+  --cc-shadow-2: 0 4px 14px rgba(0, 0, 0, 0.45);
+  --cc-shadow-3: 0 12px 36px rgba(0, 0, 0, 0.55);
+
+  --cc-overlay: rgba(2, 6, 23, 0.7);
+  --cc-skeleton-base: #1a2436;
+  --cc-skeleton-shine: #263247;
+}
+
+// -----------------------------------------------------------------------------
+// Tokens de tema claro (default)
+// -----------------------------------------------------------------------------
+:root {
+  color-scheme: light;
+
+  // Marca ------------------------------------------------------------------
+  --cc-primary: #1e3a8a;          // azul marino — banca/fintech clásico
+  --cc-primary-hover: #16296b;
+  --cc-primary-soft: #dbe6fb;
+  --cc-on-primary: #ffffff;
+  --cc-accent: #b8892b;           // dorado apagado — detalle premium
+  --cc-accent-soft: #f6ecd6;
+  --cc-on-accent: #2b1f04;
+
+  // Semánticos ------------------------------------------------------------
+  --cc-success: #16a34a;
+  --cc-success-soft: #dcfce7;
+  --cc-warning: #d97706;
+  --cc-warning-soft: #fef3c7;
+  --cc-danger: #dc2626;
+  --cc-danger-soft: #fee2e2;
+  --cc-info: #2563eb;
+  --cc-info-soft: #dbeafe;
+
+  // Superficies -----------------------------------------------------------
+  --cc-bg: #f4f6f9;
+  --cc-surface: #ffffff;
+  --cc-surface-2: #f8fafc;
+  --cc-surface-hover: #f1f5f9;
+  --cc-border: #e2e8f0;
+  --cc-divider: #eef2f7;
+
+  // Texto -----------------------------------------------------------------
+  --cc-text: #0f172a;
+  --cc-text-2: #475569;
+  --cc-text-3: #94a3b8;
+  --cc-text-disabled: #cbd5e1;
+
+  // Finanzas --------------------------------------------------------------
+  --cc-income: #16a34a;
+  --cc-expense: #dc2626;
+
+  // Gráficos (categóricos, en orden de uso) ---------------------------------
+  --cc-chart-1: #1e3a8a;
+  --cc-chart-2: #f59e0b;
+  --cc-chart-3: #2563eb;
+  --cc-chart-4: #db2777;
+  --cc-chart-5: #7c3aed;
+  --cc-chart-6: #059669;
+  --cc-chart-7: #ea580c;
+  --cc-chart-8: #0891b2;
+  --cc-chart-9: #65a30d;
+  --cc-chart-10: #64748b;
+  --cc-chart-grid: var(--cc-divider);
+  --cc-chart-label: var(--cc-text-2);
+
+  // Tipografía ------------------------------------------------------------
+  --cc-font: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --cc-font-mono: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  --cc-fs-xs: 0.75rem;    // 12
+  --cc-fs-sm: 0.875rem;   // 14
+  --cc-fs-md: 1rem;       // 16
+  --cc-fs-lg: 1.125rem;   // 18
+  --cc-fs-xl: 1.375rem;   // 22
+  --cc-fs-2xl: clamp(1.5rem, 1.2rem + 1vw, 1.875rem);   // 24–30
+  --cc-fs-3xl: clamp(1.875rem, 1.4rem + 1.6vw, 2.5rem); // 30–40
+  --cc-lh-tight: 1.2;
+  --cc-lh: 1.5;
+  --cc-fw-regular: 400;
+  --cc-fw-medium: 500;
+  --cc-fw-semibold: 600;
+  --cc-fw-bold: 700;
+
+  // Espaciado (escala de 4px) --------------------------------------------
+  --cc-space-1: 4px;
+  --cc-space-2: 8px;
+  --cc-space-3: 12px;
+  --cc-space-4: 16px;
+  --cc-space-5: 20px;
+  --cc-space-6: 24px;
+  --cc-space-8: 32px;
+  --cc-space-10: 40px;
+  --cc-space-12: 48px;
+
+  // Radios ----------------------------------------------------------------
+  --cc-radius-sm: 8px;
+  --cc-radius-md: 12px;
+  --cc-radius-lg: 16px;
+  --cc-radius-xl: 24px;
+  --cc-radius-full: 999px;
+
+  // Sombras ---------------------------------------------------------------
+  --cc-shadow-1: 0 1px 2px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.08);
+  --cc-shadow-2: 0 4px 12px rgba(15, 23, 42, 0.08);
+  --cc-shadow-3: 0 12px 32px rgba(15, 23, 42, 0.12);
+  --cc-overlay: rgba(15, 23, 42, 0.45);
+  --cc-skeleton-base: #e9edf3;
+  --cc-skeleton-shine: #f6f8fb;
+
+  // Layout ----------------------------------------------------------------
+  --cc-sidenav-width: 264px;
+  --cc-topbar-height: 64px;
+  --cc-bottomnav-height: 64px;
+  --cc-content-max: 1200px;
+  --cc-gutter: 16px;
+  --cc-safe-top: env(safe-area-inset-top, 0px);
+  --cc-safe-bottom: env(safe-area-inset-bottom, 0px);
+
+  // Movimiento ------------------------------------------------------------
+  --cc-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --cc-dur-fast: 120ms;
+  --cc-dur: 200ms;
+  --cc-dur-slow: 320ms;
+
+  // Z-index ---------------------------------------------------------------
+  --cc-z-sticky: 10;
+  --cc-z-fab: 20;
+  --cc-z-nav: 30;
+  // Drawer mobile del sidenav (.cc-sidenav) y su backdrop - por encima del
+  // resto del chrome de la app, pero debajo del loader global/MatDialog.
+  --cc-z-drawer: 900;
+  // Por encima de .cdk-overlay-container (z-index 1000 fijo de Angular
+  // Material): el loader global debe verse siempre arriba de un MatDialog
+  // abierto, nunca competir con él en el mismo nivel de stacking.
+  --cc-z-overlay: 1100;
+}
+
+@include up(md) {
+  :root {
+    --cc-gutter: 24px;
+  }
+}
+
+@include up(lg) {
+  :root {
+    --cc-gutter: 32px;
+  }
+}
+
+// Tema oscuro explícito (ThemeService pone .dark-theme / .light-theme en <html>)
+:root.dark-theme {
+  @include dark-tokens;
+}
+
+// Tema del sistema cuando no hay clase explícita
+@media (prefers-color-scheme: dark) {
+  :root:not(.light-theme) {
+    @include dark-tokens;
+  }
+}

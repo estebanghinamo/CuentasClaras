@@ -1,0 +1,39 @@
+services:
+  # Solo la base de datos (+ Redis, usado por el backend para queue/cache) corren
+  # en Docker durante el desarrollo diario. Backend (php artisan serve) y frontend
+  # (ng serve) corren nativos en el host, cada uno en su terminal - ver ADR-004 y
+  # README.md. CI (.github/workflows/ci.yml) tampoco usa Docker para backend/
+  # frontend: corre PHP nativo contra MySQL/Redis como service containers propios
+  # de GitHub Actions.
+
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    # Credenciales de desarrollo local únicamente (ver PRODUCTION_CHECKLIST.md).
+    # Deben coincidir con DB_DATABASE/DB_USERNAME/DB_PASSWORD en backend/.env.
+    environment:
+      MYSQL_ROOT_PASSWORD: root_dev_password
+      MYSQL_DATABASE: cuentas_claras
+      MYSQL_USER: cuentas_claras
+      MYSQL_PASSWORD: cuentas_claras_dev_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    networks:
+      - cuentas_claras
+
+  redis:
+    image: redis:alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - cuentas_claras
+
+networks:
+  cuentas_claras:
+
+volumes:
+  db_data:

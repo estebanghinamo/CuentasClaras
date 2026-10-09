@@ -1,0 +1,67 @@
+// Antes una lista de filas apiladas con "Editar"/"Eliminar" como botones de
+// texto (se veía como una lista de admin genérica) - ahora un grid de
+// tarjetas compactas con el mismo tratamiento ícono+color que las filas de
+// gastos, para que la sección se sienta parte del mismo diseño.
+.cc-category-manager {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cc-space-3);
+}
+
+.cc-category-manager__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--cc-space-2);
+}
+
+.cc-category-manager__card {
+  display: flex;
+  align-items: center;
+  gap: var(--cc-space-2);
+  padding: var(--cc-space-2) var(--cc-space-2) var(--cc-space-2) var(--cc-space-3);
+  border: 1px solid var(--cc-border);
+  border-radius: var(--cc-radius-md);
+  background: var(--cc-surface);
+  transition: border-color var(--cc-dur-fast) var(--cc-ease);
+
+  &:hover {
+    border-color: var(--cc-border-strong, var(--cc-text-3));
+  }
+}
+
+.cc-category-manager__icon {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--cc-radius-full);
+
+  .material-symbols-outlined {
+    font-size: 20px;
+  }
+}
+
+.cc-category-manager__info {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+  flex: 1;
+
+  strong {
+    font-size: var(--cc-fs-sm);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.cc-category-manager__actions {
+  flex: 0 0 auto;
+  display: flex;
+}
+
+.cc-category-manager__add {
+  align-self: flex-start;
+}

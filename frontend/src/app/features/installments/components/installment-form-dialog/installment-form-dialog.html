@@ -1,0 +1,55 @@
+<h2 mat-dialog-title>{{ data.installment ? 'Editar compra en cuotas' : 'Nueva compra en cuotas' }}</h2>
+
+<form [formGroup]="form" (ngSubmit)="submit()">
+  <mat-dialog-content class="cc-stack">
+    <mat-form-field appearance="outline">
+      <mat-label>Descripción</mat-label>
+      <input matInput formControlName="description" maxlength="255" />
+      @if (serverFieldError('description'); as message) { <mat-error>{{ message }}</mat-error> }
+    </mat-form-field>
+
+    @if (!data.installment) {
+      <mat-form-field appearance="outline">
+        <mat-label>Monto total</mat-label>
+        <input matInput type="number" step="0.01" min="0.01" inputmode="decimal" formControlName="total_amount" />
+        @if (serverFieldError('total_amount'); as message) { <mat-error>{{ message }}</mat-error> }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Cantidad de cuotas</mat-label>
+        <input matInput type="number" min="1" max="120" step="1" formControlName="installments_count" />
+        @if (serverFieldError('installments_count'); as message) { <mat-error>{{ message }}</mat-error> }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Fecha de inicio</mat-label>
+        <input matInput type="date" [min]="minStartDate" [max]="maxStartDate" formControlName="start_date" />
+        @if (serverFieldError('start_date'); as message) { <mat-error>{{ message }}</mat-error> }
+      </mat-form-field>
+    }
+
+    <div class="cc-installment-form__category">
+      <mat-form-field appearance="outline">
+        <mat-label>Categoría</mat-label>
+        <mat-select formControlName="category_id">
+          <mat-option [value]="null">Sin categoría</mat-option>
+          @for (category of categories(); track category.id) {
+            <mat-option [value]="category.id">{{ category.name }}</mat-option>
+          }
+        </mat-select>
+        @if (serverFieldError('category_id'); as message) { <mat-error>{{ message }}</mat-error> }
+      </mat-form-field>
+      <button mat-stroked-button type="button" (click)="openCategoryForm()">
+        <span class="material-symbols-outlined">add</span>
+        Nueva categoría
+      </button>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-stroked-button type="button" mat-dialog-close>Cancelar</button>
+    <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || saving()">
+      @if (saving()) { <app-spinner [size]="20" /> } @else { Guardar }
+    </button>
+  </mat-dialog-actions>
+</form>

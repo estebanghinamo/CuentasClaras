@@ -1,0 +1,43 @@
+<section class="cc-page">
+  <header class="cc-page__header">
+    <div class="cc-page__title">
+      <h1 class="cc-h1">Sugerencias inteligentes</h1>
+      <p class="cc-caption">Gastos recurrentes detectados que todavía no son un servicio</p>
+    </div>
+  </header>
+
+  @if (suggestions().length === 0) {
+    <div class="cc-card cc-empty">
+      <div class="cc-empty__icon">
+        <span class="material-symbols-outlined">lightbulb</span>
+      </div>
+      <p class="cc-empty__title">Sin sugerencias por ahora</p>
+      <p class="cc-empty__text">
+        El sistema analiza tus gastos cada semana buscando pagos que se repiten mes a mes con un monto parecido (como
+        un servicio o una suscripción) y todavía no cargaste como servicio. Cuando detecte uno, te va a aparecer acá
+        para que lo confirmes con un clic.
+      </p>
+    </div>
+  } @else {
+    <div class="cc-grid">
+      @for (suggestion of suggestions(); track suggestion.id) {
+        <div class="cc-card cc-suggestion-card">
+          <div class="cc-card__header">
+            <strong>{{ suggestion.description }}</strong>
+          </div>
+
+          <div class="cc-suggestion-card__meta cc-caption">
+            <span>~{{ suggestion.avg_amount | number: '1.2-2' }} por mes</span>
+            <span>{{ suggestion.occurrences }} meses seguidos</span>
+            <span>Último gasto: {{ suggestion.last_seen_date | date: 'dd/MM/yyyy' }}</span>
+          </div>
+
+          <div class="cc-suggestion-card__actions">
+            <button mat-flat-button color="primary" (click)="acceptSuggestion(suggestion)">Crear servicio</button>
+            <button mat-stroked-button (click)="dismissSuggestion(suggestion)">Descartar</button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</section>

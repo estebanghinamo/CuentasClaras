@@ -1,0 +1,22 @@
+<h2 mat-dialog-title>{{ data.service ? 'Editar servicio' : 'Nuevo servicio' }}</h2>
+
+<form [formGroup]="form" (ngSubmit)="submit()">
+  <mat-dialog-content class="cc-stack">
+    <app-service-fields-form [form]="form" [fieldError]="serverFieldError" />
+
+    @if (data.service) {
+      <mat-checkbox formControlName="active">Activo</mat-checkbox>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-stroked-button type="button" mat-dialog-close>Cancelar</button>
+    <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || saving()">
+      @if (saving()) {
+        <app-spinner [size]="20" />
+      } @else {
+        Guardar
+      }
+    </button>
+  </mat-dialog-actions>
+</form>

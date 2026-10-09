@@ -1,0 +1,61 @@
+<h2 mat-dialog-title>{{ data.category ? 'Editar categoría' : 'Nueva categoría' }}</h2>
+
+<form [formGroup]="form" (ngSubmit)="submit()">
+  <mat-dialog-content class="cc-stack">
+
+    <mat-form-field appearance="outline">
+      <mat-label>Nombre</mat-label>
+      <input matInput formControlName="name" maxlength="100" />
+      @if (serverFieldError('name'); as message) {
+        <mat-error>{{ message }}</mat-error>
+      }
+    </mat-form-field>
+
+    <div>
+      <p class="cc-caption">Ícono</p>
+      <div class="cc-icon-grid">
+        @for (icon of icons; track icon) {
+          <button
+            type="button"
+            class="cc-icon-grid__item"
+            [class.is-selected]="form.controls.icon.value === icon"
+            (click)="form.controls.icon.setValue(icon)"
+          >
+            <span class="material-symbols-outlined">{{ icon }}</span>
+          </button>
+        }
+      </div>
+    </div>
+
+    <div>
+      <p class="cc-caption">Color</p>
+      <div class="cc-color-grid">
+        @for (color of colors; track color) {
+          <button
+            type="button"
+            class="cc-color-grid__item"
+            [class.is-selected]="form.controls.color.value === color"
+            [style.background]="color"
+            [attr.aria-label]="'Color ' + color"
+            (click)="form.controls.color.setValue(color)"
+          ></button>
+        }
+      </div>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Color personalizado (hex)</mat-label>
+        <input matInput formControlName="color" placeholder="#RRGGBB" />
+      </mat-form-field>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-stroked-button type="button" mat-dialog-close>Cancelar</button>
+    <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || saving()">
+      @if (saving()) {
+        <app-spinner [size]="20" />
+      } @else {
+        Guardar
+      }
+    </button>
+  </mat-dialog-actions>
+</form>

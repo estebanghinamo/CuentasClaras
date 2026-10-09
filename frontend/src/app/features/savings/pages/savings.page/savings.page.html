@@ -1,0 +1,71 @@
+<section class="cc-page">
+  <header class="cc-page__header">
+    <div class="cc-page__title">
+      <h1 class="cc-h1">Monedero</h1>
+      <p class="cc-caption">Ahorro del espacio, aparte de ingresos y gastos del mes</p>
+    </div>
+    <div class="cc-page__actions">
+      <button mat-stroked-button (click)="openMovement('withdraw')">
+        <span class="material-symbols-outlined">south</span>
+        Retirar
+      </button>
+      <button mat-flat-button color="primary" (click)="openMovement('deposit')">
+        <span class="material-symbols-outlined">north</span>
+        Depositar
+      </button>
+    </div>
+  </header>
+
+  <div class="cc-card cc-savings-balance">
+    <span class="cc-caption">Saldo actual</span>
+    <strong class="cc-savings-balance__amount">{{ wallet()?.balance ?? 0 | currency: context.membership()?.currency : 'symbol-narrow' : '1.2-2' }}</strong>
+    <div class="cc-savings-balance__totals">
+      <span><span class="material-symbols-outlined cc-positive">north</span> {{ wallet()?.total_deposited ?? 0 | currency: context.membership()?.currency : 'symbol-narrow' : '1.2-2' }} depositado</span>
+      <span><span class="material-symbols-outlined cc-negative">south</span> {{ wallet()?.total_withdrawn ?? 0 | currency: context.membership()?.currency : 'symbol-narrow' : '1.2-2' }} retirado</span>
+    </div>
+  </div>
+
+  <div class="cc-card">
+    <div class="cc-card__header">Evolución (últimos 12 meses)</div>
+    <app-line-chart [labels]="historyLabels()" [data]="historyData()" />
+  </div>
+
+  <div class="cc-card">
+    <div class="cc-card__header">Movimientos</div>
+    @if (movements().length === 0) {
+      <p>Todavía no hay movimientos.</p>
+    } @else {
+      <ul class="cc-stack cc-stack--sm cc-zebra-list">
+        @for (movement of movements(); track movement.id) {
+          <li class="cc-row">
+            <div class="cc-row__icon" [class.cc-negative]="movement.type === 'withdraw'" [class.cc-positive]="movement.type === 'deposit'">
+              <span class="material-symbols-outlined">{{ movement.type === 'deposit' ? 'north' : 'south' }}</span>
+            </div>
+            <div class="cc-row__main">
+              <span class="cc-row__title">{{ movement.type === 'deposit' ? 'Depósito' : 'Retiro' }}</span>
+              <span class="cc-row__meta">
+                {{ monthLabel(movement.month) }} {{ movement.year }}
+                @if (movement.user_name) { · {{ movement.user_name }} }
+                @if (movement.note) { · {{ movement.note }} }
+              </span>
+            </div>
+            <div class="cc-row__end">
+              <strong [class.cc-positive]="movement.type === 'deposit'" [class.cc-negative]="movement.type === 'withdraw'">
+                {{ movement.type === 'deposit' ? '+' : '-' }}{{ movement.amount | currency: context.membership()?.currency : 'symbol-narrow' : '1.2-2' }}
+              </strong>
+              <span class="cc-caption">Saldo {{ movement.balance_after | currency: context.membership()?.currency : 'symbol-narrow' : '1.2-2' }}</span>
+            </div>
+          </li>
+        }
+      </ul>
+    }
+
+    @if (meta(); as m) {
+      <div class="cc-cluster">
+        <button mat-stroked-button (click)="changePage(-1)" [disabled]="m.page <= 1">‹ Anterior</button>
+        <span class="cc-caption">Página {{ m.page }} de {{ m.last_page }}</span>
+        <button mat-stroked-button (click)="changePage(1)" [disabled]="m.page >= m.last_page">Siguiente ›</button>
+      </div>
+    }
+  </div>
+</section>

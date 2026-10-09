@@ -1,0 +1,30 @@
+<div class="cc-month-picker">
+  <button mat-icon-button type="button" class="cc-month-picker__arrow" (click)="changeMonth(-1)" aria-label="Mes anterior">
+    <span class="material-symbols-outlined">chevron_left</span>
+  </button>
+
+  <button type="button" class="cc-month-picker__trigger" (click)="picker.open()">
+    <span class="material-symbols-outlined">calendar_month</span>
+    <span class="cc-hide-mobile">{{ label() }}</span>
+    <span class="cc-hide-desktop">{{ shortLabel() }}</span>
+  </button>
+
+  <button mat-icon-button type="button" class="cc-month-picker__arrow" (click)="changeMonth(1)" aria-label="Mes siguiente">
+    <span class="material-symbols-outlined">chevron_right</span>
+  </button>
+
+  <input
+    class="cc-visually-hidden"
+    tabindex="-1"
+    aria-label="Mes y año seleccionado"
+    [matDatepicker]="picker"
+    [formControl]="control"
+  />
+  <mat-datepicker
+    #picker
+    startView="multi-year"
+    panelClass="cc-month-picker__panel"
+    (yearSelected)="chosenYearHandler($event)"
+    (monthSelected)="chosenMonthHandler($event, picker)"
+  ></mat-datepicker>
+</div>

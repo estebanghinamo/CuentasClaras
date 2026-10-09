@@ -1,0 +1,959 @@
+// =============================================================================
+// Layout: shell (sidenav / bottom nav), página, grillas, tarjetas, FAB.
+// Clases globales que los componentes componen; los componentes NO redefinen
+// el layout general.
+// =============================================================================
+@use 'tokens' as t;
+
+// -----------------------------------------------------------------------------
+// Shell de la app
+//   < md : top bar + contenido + bottom nav (5 ítems) + FAB sobre el bottom nav
+//   ≥ md : sidenav fijo a la izquierda + top bar + contenido
+// -----------------------------------------------------------------------------
+.cc-shell {
+  min-height: 100dvh;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  grid-template-columns: 1fr;
+  background: var(--cc-bg);
+
+  @include t.up(md) {
+    grid-template-columns: var(--cc-sidenav-width) 1fr;
+    transition: grid-template-columns var(--cc-dur) var(--cc-ease);
+  }
+
+  // El panel lateral se retrajo (botón en el topbar) - el contenido ocupa todo el ancho.
+  &--nav-collapsed {
+    @include t.up(md) {
+      grid-template-columns: 0 1fr;
+    }
+  }
+}
+
+// Fondo oscuro detrás del drawer mobile - clickeable para cerrarlo. No existe en desktop.
+.cc-sidenav-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: var(--cc-z-drawer);
+  background: rgba(15, 23, 42, 0.45);
+
+  @include t.up(md) {
+    display: none;
+  }
+}
+
+.cc-topbar {
+  position: sticky;
+  top: 0;
+  z-index: var(--cc-z-nav);
+  height: calc(var(--cc-topbar-height) + var(--cc-safe-top));
+  padding-top: var(--cc-safe-top);
+  display: flex;
+  align-items: center;
+  gap: var(--cc-space-3);
+  padding-inline: var(--cc-gutter);
+  background: color-mix(in srgb, var(--cc-surface) 88%, transparent);
+  backdrop-filter: saturate(180%) blur(12px);
+  -webkit-backdrop-filter: saturate(180%) blur(12px);
+  border-bottom: 1px solid var(--cc-divider);
+
+  @include t.up(md) {
+    grid-column: 2;
+  }
+}
+
+// Campana de notificaciones: unico elemento a la derecha del topbar (el boton
+// de cerrar sesion que ocupaba este lugar se saco, en desktop ya esta en el
+// sidenav - a pedido del usuario, 2026-09-23). margin-left:auto la empuja al
+// extremo derecho, flex centra su contenido verticalmente.
+.cc-topbar__bell {
+  margin-left: auto;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+
+  // mismo fix de centrado que .cc-topbar__back (el span no es un mat-icon real).
+  .material-symbols-outlined {
+    display: block;
+  }
+}
+
+// "Volver" (mobile, dentro de un workspace: el panel arranca cerrado y sin
+// esto no habría forma de volver a /workspaces) vs. "mostrar menú" (desktop,
+// solo cuando el panel está retraído) - ocupan el mismo lugar al inicio del
+// topbar, la visibilidad de cada uno la da .cc-hide-desktop/.cc-hide-mobile.
+.cc-topbar__back,
+.cc-topbar__nav-toggle {
+  flex-shrink: 0;
+
+  // El <span class="material-symbols-outlined"> no es un <mat-icon> real, asi
+  // que el centrado automatico que Material le da a su icono interno no
+  // aplica - sin esto la flecha queda corrida hacia abajo dentro del boton
+  // circular (bug real reportado por el usuario).
+  .material-symbols-outlined {
+    display: block;
+  }
+}
+
+// Selector de workspace en el topbar (M-19) - mat-form-field sin el espacio
+// reservado para hint/error, ancho acotado para que no ocupe todo el topbar.
+.cc-workspace-select {
+  width: 100%;
+  max-width: 320px;
+
+  .mat-mdc-text-field-wrapper {
+    height: 44px;
+  }
+}
+
+// Mobile: drawer superpuesto, oculto fuera de pantalla salvo .is-open.
+// Desktop (≥md): columna fija del grid, sticky; se puede retraer del todo con
+// .cc-shell--nav-collapsed (ver arriba), que le saca el padding/opacidad.
+.cc-sidenav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: var(--cc-z-drawer);
+  display: flex;
+  flex-direction: column;
+  width: min(var(--cc-sidenav-width), 84vw);
+  height: 100dvh;
+  padding: var(--cc-space-4) var(--cc-space-3);
+  gap: var(--cc-space-1);
+  background: var(--cc-surface);
+  border-right: 1px solid var(--cc-divider);
+  transform: translateX(-100%);
+  transition: transform var(--cc-dur-slow) var(--cc-ease);
+
+  &.is-open {
+    transform: translateX(0);
+  }
+
+  @include t.up(md) {
+    grid-row: 1 / span 2;
+    grid-column: 1;
+    position: sticky;
+    z-index: auto;
+    top: 0;
+    width: auto;
+    transform: none;
+    overflow: hidden;
+    transition: padding var(--cc-dur) var(--cc-ease), opacity var(--cc-dur) var(--cc-ease), border-color var(--cc-dur) var(--cc-ease);
+  }
+}
+
+.cc-shell--nav-collapsed .cc-sidenav {
+  @include t.up(md) {
+    padding: 0;
+    opacity: 0;
+    pointer-events: none;
+    border-color: transparent;
+  }
+}
+
+// Fila con el nombre del workspace + el botón único para minimizar el panel
+// (mismo botón/ícono en mobile y desktop, ver ShellNavService.minimize()).
+.cc-sidenav__brand-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--cc-space-2);
+}
+
+.cc-sidenav__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--cc-space-2);
+  padding: var(--cc-space-2) var(--cc-space-3) var(--cc-space-4);
+  font-weight: var(--cc-fw-bold);
+  font-size: var(--cc-fs-lg);
+  color: var(--cc-text);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+}
+
+// Panel del selector de workspace: mismo lenguaje visual que .cc-workspace-card
+// (icono circular por tipo + nombre/tipo) para que "elegir espacio" se vea
+// consistente entre el dropdown del sidenav y la grilla de /workspaces.
+.cc-workspace-menu-panel .mat-mdc-menu-content {
+  padding: var(--cc-space-2);
+  min-width: 260px;
+}
+
+// Item del selector de workspace (mat-menu-item con ícono + nombre + tipo).
+// El contenido del template queda envuelto por Angular Material dentro de su
+// propio <span class="mat-mdc-menu-item-text"> (ver mat-menu-item), que es el
+// hijo directo real del <button> - por eso el flex va en ese wrapper interno,
+// no alcanza con aplicarlo acá afuera.
+.cc-workspace-menu-item {
+  align-items: center !important;
+  height: auto !important;
+  padding: var(--cc-space-2) var(--cc-space-3) !important;
+  border-radius: var(--cc-radius-md);
+
+  & + & {
+    margin-top: 2px;
+  }
+
+  .mat-mdc-menu-item-text {
+    display: flex;
+    align-items: center;
+    gap: var(--cc-space-3);
+    width: 100%;
+  }
+}
+
+.cc-workspace-menu-item__icon {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--cc-radius-full);
+  background: var(--cc-primary-soft);
+  color: var(--cc-primary);
+
+  .material-symbols-outlined {
+    font-size: 20px;
+  }
+}
+
+.cc-workspace-menu-item__icon--muted {
+  background: var(--cc-surface-2);
+  color: var(--cc-text-2);
+}
+
+.cc-workspace-menu-item__title {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  line-height: 1.3;
+
+  strong {
+    font-size: var(--cc-fs-sm);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.cc-workspace-menu-item--action {
+  color: var(--cc-primary);
+
+  strong {
+    color: var(--cc-primary);
+  }
+}
+
+// Agrupa los links de navegación separados del resto del sidenav (botón
+// "Agregar sección" y bloque de usuario) para poder darles su propio gap.
+// min-height:0 + overflow-y:auto: con muchas secciones habilitadas (M-19,
+// secciones opcionales) la lista puede superar el alto del sidenav - antes
+// desbordaba y tapaba el bloque de usuario/logout; ahora solo esta lista
+// hace scroll y el resto del sidenav queda fijo.
+.cc-sidenav__group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.cc-nav-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--cc-space-3);
+  padding: 10px var(--cc-space-3);
+  border-radius: var(--cc-radius-md);
+  color: var(--cc-text-2);
+  font-weight: var(--cc-fw-medium);
+  font-size: var(--cc-fs-sm);
+  transition: background var(--cc-dur-fast) var(--cc-ease), color var(--cc-dur-fast) var(--cc-ease);
+
+  &:hover {
+    background: var(--cc-surface-hover);
+    color: var(--cc-text);
+    text-decoration: none;
+  }
+
+  &.is-active {
+    background: var(--cc-primary-soft);
+    color: var(--cc-primary);
+    font-weight: var(--cc-fw-semibold);
+
+    // Barra lateral de color para reforzar cuál es la sección activa, no solo
+    // el fondo suave (a pedido del usuario: "que se vea más pro").
+    &::before {
+      content: '';
+      position: absolute;
+      left: -6px;
+      top: 20%;
+      bottom: 20%;
+      width: 3px;
+      border-radius: var(--cc-radius-full);
+      background: var(--cc-primary);
+    }
+
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+    }
+  }
+}
+
+// "Agregar sección" es una acción secundaria, no una sección de navegación -
+// se separa visualmente (más tenue, borde punteado) del resto de los items.
+.cc-nav-item--muted {
+  margin-top: var(--cc-space-2);
+  color: var(--cc-text-3);
+  border: 1px dashed var(--cc-divider);
+
+  &:hover {
+    color: var(--cc-text);
+  }
+}
+
+// Bloque de usuario al pie del sidenav: avatar con iniciales, nombre/email, y
+// el botón de logout ahora vive acá (antes era un mat-stroked-button suelto).
+.cc-sidenav__user {
+  display: flex;
+  align-items: center;
+  gap: var(--cc-space-2);
+  padding: var(--cc-space-2) var(--cc-space-2);
+  margin-top: var(--cc-space-2);
+  border-top: 1px solid var(--cc-divider);
+  padding-top: var(--cc-space-4);
+}
+
+.cc-sidenav__user-avatar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--cc-radius-full);
+  background: var(--cc-primary-soft);
+  color: var(--cc-primary);
+  font-size: var(--cc-fs-sm);
+  font-weight: var(--cc-fw-bold);
+}
+
+.cc-sidenav__user-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.3;
+
+  strong {
+    font-size: var(--cc-fs-sm);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .cc-caption {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.cc-content {
+  min-width: 0;
+  padding-bottom: calc(var(--cc-bottomnav-height) + var(--cc-safe-bottom) + var(--cc-space-6));
+
+  @include t.up(md) {
+    grid-column: 2;
+    padding-bottom: var(--cc-space-8);
+  }
+}
+
+.cc-bottomnav {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: var(--cc-z-nav);
+  height: calc(var(--cc-bottomnav-height) + var(--cc-safe-bottom));
+  padding-bottom: var(--cc-safe-bottom);
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  background: var(--cc-surface);
+  border-top: 1px solid var(--cc-divider);
+
+  @include t.up(md) {
+    display: none;
+  }
+}
+
+.cc-bottomnav__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  font-size: 11px;
+  font-weight: var(--cc-fw-medium);
+  color: var(--cc-text-3);
+  text-decoration: none;
+  // El ítem "Más" es un <button>, no un <a> - reseteo para que se vea igual.
+  background: none;
+  border: none;
+  font-family: inherit;
+  cursor: pointer;
+
+  .material-symbols-outlined {
+    font-size: 24px;
+    padding: 2px 14px;
+    border-radius: var(--cc-radius-full);
+    transition: background var(--cc-dur-fast) var(--cc-ease);
+  }
+
+  &.is-active {
+    color: var(--cc-primary);
+
+    .material-symbols-outlined {
+      background: var(--cc-primary-soft);
+      font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Página
+// -----------------------------------------------------------------------------
+.cc-page {
+  width: 100%;
+  max-width: var(--cc-content-max);
+  margin-inline: auto;
+  padding: var(--cc-space-4) var(--cc-gutter);
+  display: flex;
+  flex-direction: column;
+  gap: var(--cc-space-5);
+
+  @include t.up(md) {
+    padding-block: var(--cc-space-6);
+    gap: var(--cc-space-6);
+  }
+}
+
+.cc-page__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--cc-space-3);
+}
+
+.cc-page__title {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cc-space-1);
+}
+
+// Variante con flecha "volver" al lado del título (ej. Notificaciones, a
+// pedido del usuario: la campana te deja en un "punto muerto" sin forma de
+// regresar a donde estabas). Reutilizable en cualquier página que necesite
+// el mismo patrón sin pasar por el sidenav.
+.cc-page__title--with-back {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--cc-space-2);
+}
+
+.cc-page__back {
+  flex-shrink: 0;
+
+  // El <span class="material-symbols-outlined"> no es un <mat-icon> real -
+  // mismo fix de centrado que .cc-topbar__back.
+  .material-symbols-outlined {
+    display: block;
+  }
+}
+
+.cc-page__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--cc-space-2);
+}
+
+// Switch de tema claro/oscuro (Perfil): iconos sol/luna a los costados del
+// mat-slide-toggle, mismo alto que un botón para no romper el header.
+.cc-theme-switch {
+  gap: var(--cc-space-1);
+  color: var(--cc-text-2);
+
+  .material-symbols-outlined {
+    display: block;
+    font-size: 20px;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Composición
+// -----------------------------------------------------------------------------
+.cc-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cc-space-4);
+
+  &--sm { gap: var(--cc-space-2); }
+  &--lg { gap: var(--cc-space-6); }
+}
+
+// Zebra striping para listas de filas repetitivas (gastos, servicios,
+// cuotas, movimientos, miembros, etc.) - a pedido del usuario: blanco/superficie
+// normal en las filas impares, --cc-surface-2 (mismo token ya usado para
+// paneles secundarios, un tono apenas más gris) en las pares, para que se
+// puedan diferenciar sin que sea un contraste duro. Se aplica al contenedor
+// (ul/div con display:flex/grid en columna) y pinta cada hijo directo par -
+// no importa si son <li> o <div>, cualquier "fila" de una lista de este tipo.
+.cc-zebra-list > :nth-child(odd) {
+  background: var(--cc-surface-2);
+}
+
+// BUG REAL (2026-09-24): Angular Material define `.mat-mdc-dialog-content{
+// display:block; flex-grow:1; ...}` en su propio CSS. Ese selector de una
+// sola clase tiene la MISMA especificidad que `.cc-stack`, y como el CSS de
+// Material se inyecta después, gana él: mat-dialog-content queda en
+// `display:block` en vez de flex-column. Con `display:block`, cada
+// mat-form-field (que es `display:inline-block` por dentro) fluye como
+// texto y varios quedan lado a lado en la misma fila en vez de apilados -
+// esto es lo que se veía como "2 columnas apretadas" en TODOS los diálogos
+// del proyecto (reportado por el usuario en "Nuevo gasto", pero el mismo
+// mat-dialog-content.cc-stack se usa en cualquier dialog.open() del repo).
+// mat-dialog-content.cc-stack (selector de 2 partes, más específico) +
+// !important fuerza el layout column sin importar el orden de carga del CSS.
+mat-dialog-content.cc-stack {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+// Formularios dentro de un mat-dialog-content: los mat-form-field con
+// subscriptSizing="dynamic" (ver expense-form-dialog/income-form-dialog) ya
+// no reservan hueco fijo para hint/error, así que sin este gap extra los
+// campos quedaban demasiado pegados entre sí (a pedido del usuario, "se ve
+// todo apretado").
+mat-dialog-content.cc-dialog-form {
+  gap: var(--cc-space-5) !important;
+}
+
+.cc-cluster {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--cc-space-2);
+}
+
+// Grilla de tarjetas que se adapta sola: 1 col en xs, 2 en sm, 3–4 en md+
+.cc-grid {
+  display: grid;
+  gap: var(--cc-space-4);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+
+  &--stats {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+  }
+
+  &--2 {
+    @include t.up(md) {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  &--main-aside {
+    @include t.up(lg) {
+      grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Tarjetas
+// -----------------------------------------------------------------------------
+.cc-card {
+  background: var(--cc-surface);
+  border: 1px solid var(--cc-divider);
+  border-radius: var(--cc-radius-lg);
+  box-shadow: var(--cc-shadow-1);
+  padding: var(--cc-space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--cc-space-3);
+  min-width: 0;
+
+  @include t.up(md) {
+    padding: var(--cc-space-5);
+  }
+
+  &--flush {
+    padding: 0;
+    overflow: hidden;
+  }
+
+  &--interactive {
+    cursor: pointer;
+    transition: transform var(--cc-dur) var(--cc-ease), box-shadow var(--cc-dur) var(--cc-ease), border-color var(--cc-dur) var(--cc-ease);
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--cc-shadow-2);
+      border-color: var(--cc-border);
+    }
+  }
+
+  &--accent {
+    background: linear-gradient(135deg, var(--cc-primary) 0%, color-mix(in srgb, var(--cc-primary) 70%, #0b1220) 100%);
+    border-color: transparent;
+    color: var(--cc-on-primary);
+
+    .cc-caption, .cc-overline, .cc-subtitle { color: color-mix(in srgb, var(--cc-on-primary) 75%, transparent); }
+  }
+}
+
+.cc-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--cc-space-2);
+}
+
+// Tarjeta de estadística (KPI)
+.cc-stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cc-space-1);
+
+  &__label {
+    font-size: var(--cc-fs-sm);
+    color: var(--cc-text-2);
+    display: flex;
+    align-items: center;
+    gap: var(--cc-space-1);
+  }
+
+  &__value {
+    font-size: var(--cc-fs-2xl);
+    font-weight: var(--cc-fw-bold);
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    line-height: var(--cc-lh-tight);
+  }
+
+  &__delta {
+    font-size: var(--cc-fs-xs);
+    font-weight: var(--cc-fw-medium);
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+
+    &.is-up { color: var(--cc-success); }
+    &.is-down { color: var(--cc-danger); }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Listas de registros (gastos, ingresos, movimientos): fila en móvil, la misma
+// fila con más columnas en desktop. Nunca una <table> con scroll horizontal.
+// -----------------------------------------------------------------------------
+.cc-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--cc-space-3);
+  padding: var(--cc-space-3) var(--cc-space-4);
+  border-bottom: 1px solid var(--cc-divider);
+  transition: background var(--cc-dur-fast) var(--cc-ease);
+
+  &:last-child { border-bottom: 0; }
+  &:hover { background: var(--cc-surface-hover); }
+
+  &__icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--cc-radius-md);
+    display: grid;
+    place-items: center;
+    background: var(--cc-row-color-soft, var(--cc-surface-2));
+    color: var(--cc-row-color, var(--cc-text-2));
+    flex-shrink: 0;
+  }
+
+  &__main {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  &__title {
+    font-weight: var(--cc-fw-medium);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__meta {
+    font-size: var(--cc-fs-xs);
+    color: var(--cc-text-2);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--cc-space-2);
+  }
+
+  &__end {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+  }
+
+  // Columnas extra solo en desktop (ej. usuario, medio de pago)
+  &__col {
+    display: none;
+    color: var(--cc-text-2);
+    font-size: var(--cc-fs-sm);
+
+    @include t.up(md) {
+      display: block;
+    }
+  }
+
+  @include t.up(md) {
+    grid-template-columns: auto minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr) auto;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// FAB (acción principal de la pantalla) — sobre el bottom nav en móvil
+// -----------------------------------------------------------------------------
+.cc-fab {
+  position: fixed;
+  right: var(--cc-space-4);
+  bottom: calc(var(--cc-bottomnav-height) + var(--cc-safe-bottom) + var(--cc-space-4));
+  z-index: var(--cc-z-fab);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--cc-space-2);
+  height: 56px;
+  padding: 0 var(--cc-space-5) 0 var(--cc-space-4);
+  border-radius: var(--cc-radius-lg);
+  background: var(--cc-primary);
+  color: var(--cc-on-primary);
+  font-weight: var(--cc-fw-semibold);
+  box-shadow: var(--cc-shadow-3);
+  transition: transform var(--cc-dur) var(--cc-ease), background var(--cc-dur-fast) var(--cc-ease);
+
+  &:hover { background: var(--cc-primary-hover); transform: translateY(-1px); }
+  &:active { transform: scale(0.97); }
+
+  @include t.up(md) {
+    right: var(--cc-space-8);
+    bottom: var(--cc-space-8);
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Filtros / barra sticky bajo el topbar
+// -----------------------------------------------------------------------------
+.cc-filterbar {
+  position: sticky;
+  top: calc(var(--cc-topbar-height) + var(--cc-safe-top));
+  z-index: var(--cc-z-sticky);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--cc-space-2);
+  padding: var(--cc-space-2) 0;
+  background: var(--cc-bg);
+}
+
+// Variante compacta: el form-field no ocupa todo el ancho disponible en
+// desktop (antes el filtro de categorías de Gastos se veía como un bloque
+// enorme sin usar todo ese espacio).
+.cc-filterbar--compact .mat-mdc-form-field {
+  width: 100%;
+
+  @include t.up(sm) {
+    max-width: 360px;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Formularios
+// -----------------------------------------------------------------------------
+.cc-form {
+  display: grid;
+  gap: var(--cc-space-4);
+  grid-template-columns: 1fr;
+
+  @include t.up(sm) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  &__full {
+    @include t.up(sm) {
+      grid-column: 1 / -1;
+    }
+  }
+
+  &__actions {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--cc-space-2);
+    padding-top: var(--cc-space-2);
+
+    @include t.down(sm) {
+      flex-direction: column-reverse;
+
+      > * { width: 100%; }
+    }
+
+    // Auth (login/registro): un solo botón de acción se ve mejor centrado y
+    // a ancho completo que alineado a la derecha (patrón pensado para
+    // formularios con varias acciones, no para un botón de submit único).
+    &--center {
+      justify-content: center;
+
+      > * { width: 100%; }
+    }
+  }
+}
+
+// Ícono prefix en un mat-form-field (ej. mail/lock en Auth) - el span no es
+// un <mat-icon> real, mismo fix de centrado/color que el resto del proyecto.
+.mat-mdc-form-field [matPrefix].material-symbols-outlined {
+  display: block;
+  margin-right: var(--cc-space-2);
+  color: var(--cc-text-3);
+  font-size: 20px;
+}
+
+// Pantallas de auth (login/registro): tarjeta centrada con fondo de marca
+.cc-auth {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: var(--cc-space-6) var(--cc-gutter);
+  background:
+    radial-gradient(1200px 600px at 10% -10%, var(--cc-primary-soft), transparent 60%),
+    radial-gradient(900px 500px at 110% 110%, var(--cc-accent-soft), transparent 60%),
+    var(--cc-bg);
+
+  &__card {
+    width: 100%;
+    max-width: 420px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--cc-space-5);
+  }
+}
+
+// Tarjeta de "espacio" (workspace) - usada tanto en Home como en la página
+// de Espacios, por eso vive acá en vez de en el .scss de una sola página.
+.cc-workspace-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: var(--cc-space-3);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color var(--cc-dur-fast) var(--cc-ease), transform var(--cc-dur-fast) var(--cc-ease);
+
+  &:hover {
+    border-color: var(--cc-primary);
+  }
+}
+
+.cc-workspace-card__header {
+  display: flex;
+  align-items: center;
+  gap: var(--cc-space-3);
+}
+
+.cc-workspace-card__icon {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--cc-radius-full);
+  background: var(--cc-primary-soft);
+  color: var(--cc-primary);
+}
+
+.cc-workspace-card__title {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+
+  strong {
+    font-size: var(--cc-fs-md);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.cc-workspace-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--cc-space-2);
+  color: var(--cc-text-2);
+  font-size: var(--cc-fs-sm);
+  margin-top: auto;
+}
+
+.cc-workspace-card__meta span + span {
+  padding-left: var(--cc-space-2);
+  border-left: 1px solid var(--cc-border);
+}
+
+.cc-workspace-card__invite {
+  align-self: flex-start;
+  margin-top: var(--cc-space-1);
+}
+
+.cc-workspace-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--cc-space-3);
+  padding: var(--cc-space-8) var(--cc-space-4);
+  text-align: center;
+}
+
+.cc-workspace-empty__icon {
+  font-size: 40px;
+  color: var(--cc-text-3);
+}
+
+// Links secundarios al pie de una página de auth (ej. "¿Olvidaste tu
+// contraseña?" / "Crear una cuenta") - antes 2 <a> sueltos apilados sin
+// relación visual entre sí, ahora una fila centrada con separador.
+.cc-auth__links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: var(--cc-space-2);
+  padding-top: var(--cc-space-2);
+  border-top: 1px solid var(--cc-divider);
+  font-size: var(--cc-fs-sm);
+  text-align: center;
+}
+
+.cc-auth__links-divider {
+  color: var(--cc-text-3);
+}

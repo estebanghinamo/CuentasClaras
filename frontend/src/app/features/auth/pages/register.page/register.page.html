@@ -1,0 +1,88 @@
+<app-auth-layout title="Creá tu cuenta" subtitle="Organizá tus finanzas en minutos">
+  <form class="cc-form" [formGroup]="form" (ngSubmit)="submit()">
+    @if (bannerMessage()) {
+      <div class="cc-form__full cc-banner cc-banner--danger">
+        <span class="material-symbols-outlined">error</span>
+        <span class="cc-banner__text">{{ bannerMessage() }}</span>
+      </div>
+    }
+
+    <mat-form-field class="cc-form__full" appearance="outline">
+      <mat-label>Nombre</mat-label>
+      <span class="material-symbols-outlined" matPrefix>person</span>
+      <input matInput formControlName="name" autocomplete="name" />
+      @if (serverFieldError('name'); as message) {
+        <mat-error>{{ message }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field class="cc-form__full" appearance="outline">
+      <mat-label>Email</mat-label>
+      <span class="material-symbols-outlined" matPrefix>mail</span>
+      <input matInput type="email" formControlName="email" autocomplete="email" />
+      @if (serverFieldError('email'); as message) {
+        <mat-error>{{ message }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Contraseña</mat-label>
+      <span class="material-symbols-outlined" matPrefix>lock</span>
+      <input matInput [type]="showPassword() ? 'text' : 'password'" formControlName="password" autocomplete="new-password" />
+      <button
+        mat-icon-button
+        matSuffix
+        type="button"
+        (click)="showPassword.set(!showPassword())"
+        [attr.aria-label]="showPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+      >
+        <span class="material-symbols-outlined">{{ showPassword() ? 'visibility_off' : 'visibility' }}</span>
+      </button>
+      <mat-hint>Mínimo 8 caracteres, con letras y números.</mat-hint>
+      @if (form.controls.password.hasError('minlength')) {
+        <mat-error>Mínimo 8 caracteres.</mat-error>
+      } @else if (form.controls.password.hasError('pattern')) {
+        <mat-error>Tiene que incluir letras y números.</mat-error>
+      } @else if (serverFieldError('password'); as message) {
+        <mat-error>{{ message }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Repetir contraseña</mat-label>
+      <span class="material-symbols-outlined" matPrefix>lock</span>
+      <input
+        matInput
+        [type]="showPasswordConfirmation() ? 'text' : 'password'"
+        formControlName="password_confirmation"
+        autocomplete="new-password"
+      />
+      <button
+        mat-icon-button
+        matSuffix
+        type="button"
+        (click)="showPasswordConfirmation.set(!showPasswordConfirmation())"
+        [attr.aria-label]="showPasswordConfirmation() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+      >
+        <span class="material-symbols-outlined">{{ showPasswordConfirmation() ? 'visibility_off' : 'visibility' }}</span>
+      </button>
+      @if (form.hasError('passwordMismatch') && form.controls.password_confirmation.dirty) {
+        <mat-error>Las contraseñas no coinciden.</mat-error>
+      }
+    </mat-form-field>
+
+    <div class="cc-form__full cc-form__actions cc-form__actions--center">
+      <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || loading()">
+        @if (loading()) {
+          <app-spinner [size]="20" />
+        } @else {
+          Crear cuenta
+        }
+      </button>
+    </div>
+  </form>
+
+  <div class="cc-auth__links">
+    <a routerLink="/auth/login">Ya tengo una cuenta</a>
+  </div>
+</app-auth-layout>

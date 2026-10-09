@@ -1,0 +1,44 @@
+<h2 mat-dialog-title>{{ title }}</h2>
+
+<form [formGroup]="form" (ngSubmit)="submit()">
+  <mat-dialog-content class="cc-stack">
+    @if (data.mode === 'withdrawal') {
+      <p class="cc-caption">Acumulado en la meta: {{ data.goal.current_amount | currency: context.membership()?.currency : 'symbol-narrow' : '1.2-2' }}</p>
+    } @else if (data.mode === 'transfer') {
+      <p class="cc-caption">Saldo disponible en el monedero: {{ data.walletBalance | currency: context.membership()?.currency : 'symbol-narrow' : '1.2-2' }}</p>
+    } @else if (maxAmount(); as max) {
+      <p class="cc-caption">Disponible del mes: {{ max | currency: context.membership()?.currency : 'symbol-narrow' : '1.2-2' }}</p>
+    }
+
+    <mat-form-field appearance="outline">
+      <mat-label>Monto</mat-label>
+      <input matInput type="number" step="0.01" min="0.01" inputmode="decimal" formControlName="amount" />
+      @if (form.controls.amount.hasError('max')) {
+        <mat-error>No podés superar {{ maxAmount() | currency: context.membership()?.currency : 'symbol-narrow' : '1.2-2' }}.</mat-error>
+      } @else if (serverFieldError('amount'); as message) {
+        <mat-error>{{ message }}</mat-error>
+      }
+    </mat-form-field>
+
+    @if (data.mode !== 'transfer') {
+      <mat-form-field class="cc-form__full" appearance="outline">
+        <mat-label>Nota (opcional)</mat-label>
+        <input matInput formControlName="note" maxlength="255" />
+        @if (serverFieldError('note'); as message) {
+          <mat-error>{{ message }}</mat-error>
+        }
+      </mat-form-field>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-stroked-button type="button" mat-dialog-close>Cancelar</button>
+    <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || saving()">
+      @if (saving()) {
+        <app-spinner [size]="20" />
+      } @else {
+        {{ title }}
+      }
+    </button>
+  </mat-dialog-actions>
+</form>

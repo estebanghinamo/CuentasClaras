@@ -1,0 +1,143 @@
+// Resumen del mes: antes 3 cajas .cc-stat genéricas iguales entre sí (a
+// pedido del usuario: "se ven básicas, sin jerarquía") - ahora cada métrica
+// tiene su propio ícono + color semántico (esperado=neutro, pagado=éxito,
+// pendientes=warning, vencidos=danger), como una fila de chips destacados.
+.cc-services-summary {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--cc-space-3);
+
+  @media (min-width: 700px) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.cc-services-summary__item {
+  display: flex;
+  align-items: center;
+  gap: var(--cc-space-3);
+  padding: var(--cc-space-3);
+  border: 1px solid var(--cc-border);
+  border-radius: var(--cc-radius-md);
+  background: var(--cc-surface);
+
+  strong {
+    font-size: var(--cc-fs-lg);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.cc-services-summary__icon {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--cc-radius-full);
+  background: var(--cc-primary-soft);
+  color: var(--cc-primary);
+}
+
+.cc-services-summary__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.cc-services-summary__item.is-success .cc-services-summary__icon {
+  background: var(--cc-success-soft);
+  color: var(--cc-success);
+}
+
+.cc-services-summary__item.is-warning .cc-services-summary__icon {
+  background: var(--cc-warning-soft);
+  color: var(--cc-warning);
+}
+
+.cc-services-summary__item.is-danger .cc-services-summary__icon {
+  background: var(--cc-danger-soft);
+  color: var(--cc-danger);
+}
+
+.cc-service-list__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--cc-space-4);
+  padding: var(--cc-space-3);
+  border: 1px solid var(--cc-border);
+  border-radius: var(--cc-radius-sm);
+}
+
+.cc-service-list__info {
+  display: grid;
+  gap: var(--cc-space-2);
+  min-width: 0;
+}
+
+.cc-service-list__name,
+.cc-service-list__details,
+.cc-service-list__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--cc-space-2);
+}
+
+.cc-service-list__name {
+  flex-wrap: wrap;
+}
+
+.cc-service-list__details {
+  flex-wrap: wrap;
+  color: var(--cc-text-2);
+  font-size: var(--cc-fs-sm);
+}
+
+.cc-service-list__details span + span {
+  padding-left: var(--cc-space-2);
+  border-left: 1px solid var(--cc-border);
+}
+
+// Badge de estado (pendiente/pagado/vencido) - antes un puntito de color de
+// 10px casi invisible, ahora texto+color con buen contraste.
+.cc-service-list__status {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  padding: 2px var(--cc-space-2);
+  border-radius: var(--cc-radius-full);
+  font-size: var(--cc-fs-xs);
+  font-weight: var(--cc-fw-semibold);
+
+  &.is-paid {
+    background: var(--cc-success-soft);
+    color: var(--cc-success);
+  }
+
+  &.is-pending {
+    background: var(--cc-warning-soft);
+    color: var(--cc-warning);
+  }
+
+  &.is-overdue {
+    background: var(--cc-danger-soft);
+    color: var(--cc-danger);
+  }
+}
+
+.cc-service-list__actions {
+  flex: 0 0 auto;
+}
+
+@media (max-width: 599px) {
+  .cc-service-list__row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .cc-service-list__actions {
+    justify-content: flex-end;
+  }
+}

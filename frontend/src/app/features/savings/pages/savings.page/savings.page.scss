@@ -1,0 +1,30 @@
+.cc-savings-balance {
+  align-items: center;
+  text-align: center;
+  gap: var(--cc-space-2);
+}
+
+.cc-savings-balance__amount {
+  font-size: var(--cc-fs-3xl, 2.5rem);
+  font-weight: var(--cc-fw-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+.cc-savings-balance__totals {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--cc-space-4);
+  color: var(--cc-text-2);
+  font-size: var(--cc-fs-sm);
+}
+
+.cc-savings-balance__totals span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--cc-space-1);
+}
+
+.cc-savings-balance__totals .material-symbols-outlined {
+  font-size: 18px;
+}

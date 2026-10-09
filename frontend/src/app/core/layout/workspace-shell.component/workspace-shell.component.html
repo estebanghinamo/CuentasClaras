@@ -1,0 +1,101 @@
+<div class="cc-shell" [class.cc-shell--nav-collapsed]="shellNav.desktopCollapsed()">
+  @if (shellNav.mobileOpen()) {
+    <div class="cc-sidenav-backdrop" role="presentation" (click)="shellNav.closeMobile()" (keydown.escape)="shellNav.closeMobile()"></div>
+  }
+
+  <aside class="cc-sidenav" [class.is-open]="shellNav.mobileOpen()">
+    <div class="cc-sidenav__brand-row">
+      <button type="button" class="cc-sidenav__brand" [matMenuTriggerFor]="workspaceMenu">
+        {{ context.activeWorkspace()?.name }}
+        <span class="material-symbols-outlined">expand_more</span>
+      </button>
+      <button mat-icon-button (click)="shellNav.minimize()" aria-label="Minimizar el menú">
+        <span class="material-symbols-outlined">chevron_left</span>
+      </button>
+    </div>
+
+    <mat-menu #workspaceMenu="matMenu" class="cc-workspace-menu-panel">
+      @for (workspace of otherWorkspaces(); track workspace.id) {
+        <button mat-menu-item class="cc-workspace-menu-item" (click)="switchTo(workspace.id)">
+          <span class="cc-workspace-menu-item__icon">
+            <span class="material-symbols-outlined">{{ typeIcon(workspace.type) }}</span>
+          </span>
+          <span class="cc-workspace-menu-item__title">
+            <strong>{{ workspace.name }}</strong>
+            <small class="cc-caption">{{ typeLabel(workspace.type) }}</small>
+          </span>
+        </button>
+      }
+      @if (otherWorkspaces().length > 0) {
+        <mat-divider />
+      }
+      <a mat-menu-item class="cc-workspace-menu-item cc-workspace-menu-item--action" routerLink="/workspaces" (click)="shellNav.closeMobile()">
+        <span class="cc-workspace-menu-item__icon cc-workspace-menu-item__icon--muted">
+          <span class="material-symbols-outlined">apps</span>
+        </span>
+        <span class="cc-workspace-menu-item__title">
+          <strong>Ver todos mis espacios</strong>
+        </span>
+      </a>
+    </mat-menu>
+
+    <nav class="cc-sidenav__group" aria-label="Navegación principal">
+      @for (item of navItems(); track item.label) {
+        <a class="cc-nav-item" [routerLink]="item.link" routerLinkActive="is-active" (click)="shellNav.closeMobile()">
+          <span class="material-symbols-outlined">{{ item.icon }}</span>
+          {{ item.label }}
+        </a>
+      }
+
+      @if (!isSettlementWorkspace()) {
+        <button type="button" class="cc-nav-item cc-nav-item--muted" (click)="openAddSection()">
+          <span class="material-symbols-outlined">add_circle</span>
+          Agregar sección
+        </button>
+      }
+    </nav>
+
+    <div style="flex: 1"></div>
+
+    <div class="cc-sidenav__user">
+      <div class="cc-sidenav__user-avatar">{{ userInitials() }}</div>
+      <div class="cc-sidenav__user-info">
+        <strong>{{ authService.currentUser()?.name }}</strong>
+        <span class="cc-caption">{{ authService.currentUser()?.email }}</span>
+      </div>
+      <button mat-icon-button (click)="logout()" aria-label="Cerrar sesión" matTooltip="Cerrar sesión">
+        <span class="material-symbols-outlined">logout</span>
+      </button>
+    </div>
+  </aside>
+
+  <header class="cc-topbar">
+    <button mat-icon-button class="cc-topbar__back cc-hide-desktop" routerLink="/workspaces" aria-label="Volver a mis espacios">
+      <span class="material-symbols-outlined">arrow_back</span>
+    </button>
+    @if (shellNav.desktopCollapsed()) {
+      <button mat-icon-button class="cc-topbar__nav-toggle cc-hide-mobile" (click)="shellNav.toggleDesktop()" aria-label="Mostrar el menú">
+        <span class="material-symbols-outlined">menu</span>
+      </button>
+    }
+    <span class="cc-h1">{{ context.activeWorkspace()?.name }}</span>
+    <app-notification-bell class="cc-topbar__bell" />
+  </header>
+
+  <main class="cc-content">
+    <router-outlet />
+  </main>
+
+  <nav class="cc-bottomnav" aria-label="Navegación móvil">
+    @for (item of primaryNavItems(); track item.label) {
+      <a class="cc-bottomnav__item" [routerLink]="item.link" routerLinkActive="is-active">
+        <span class="material-symbols-outlined">{{ item.icon }}</span>
+        {{ item.label }}
+      </a>
+    }
+    <button type="button" class="cc-bottomnav__item" (click)="shellNav.openMobile()" aria-label="Más secciones">
+      <span class="material-symbols-outlined">more_horiz</span>
+      Más
+    </button>
+  </nav>
+</div>

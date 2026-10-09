@@ -1,0 +1,55 @@
+<section class="cc-page">
+  <header class="cc-page__header">
+    <div class="cc-page__title">
+      <h1 class="cc-h1">Presupuestos</h1>
+      <p class="cc-caption">Límite mensual por categoría</p>
+    </div>
+    <div class="cc-page__actions">
+      <button mat-stroked-button (click)="copyFromPreviousMonth()">Copiar del mes anterior</button>
+      <button mat-flat-button color="primary" (click)="openForm(null)" [disabled]="categoriesWithoutBudget().length === 0">
+        <span class="material-symbols-outlined">add</span>
+        Nuevo presupuesto
+      </button>
+    </div>
+  </header>
+
+  @if (budgets().length === 0 && categoriesWithoutBudget().length === 0) {
+    <p class="cc-card">No hay gastos ni presupuestos cargados para este mes.</p>
+  } @else {
+    <div class="cc-grid">
+      @for (budget of budgets(); track budget.id) {
+        <div class="cc-card cc-budget-card">
+          <div class="cc-card__header">
+            <strong>{{ budget.category_name }}</strong>
+            <span class="cc-caption">{{ budget.progress_pct }}%</span>
+          </div>
+
+          <div class="cc-progress" [class]="progressClass(budget.alert_level)">
+            <div class="cc-progress__bar" [style.width.%]="budget.progress_pct"></div>
+          </div>
+
+          <div class="cc-budget-card__meta cc-caption">
+            <span>{{ budget.spent_amount | number: '1.2-2' }} / {{ budget.limit_amount | number: '1.2-2' }}</span>
+            <span>Quedan {{ budget.remaining_amount | number: '1.2-2' }}</span>
+          </div>
+
+          <div class="cc-budget-card__actions">
+            <button mat-stroked-button (click)="openForm(budget)">Editar</button>
+            <button mat-stroked-button color="warn" (click)="deleteBudget(budget)">Eliminar</button>
+          </div>
+        </div>
+      }
+
+      @for (category of categoriesWithoutBudget(); track category.id) {
+        <div class="cc-card cc-budget-card cc-budget-card--empty">
+          <div class="cc-card__header">
+            <strong>{{ category.name }}</strong>
+            <span class="cc-badge">Sin presupuesto</span>
+          </div>
+          <p class="cc-caption">Gastado este mes: {{ category.spent_amount | number: '1.2-2' }}</p>
+          <button mat-stroked-button (click)="openFormForCategory(category)">Crear presupuesto</button>
+        </div>
+      }
+    </div>
+  }
+</section>
