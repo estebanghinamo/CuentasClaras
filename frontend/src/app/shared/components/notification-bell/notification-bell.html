@@ -2,8 +2,8 @@
   mat-icon-button
   [matMenuTriggerFor]="menu"
   (menuOpened)="notifications.loadRecentUnread()"
-  aria-label="Notificaciones"
 >
+  <span class="cc-visually-hidden">Notificaciones</span>
   @if (notifications.unreadCount() > 0) {
     <span class="material-symbols-outlined" aria-hidden="true" [matBadge]="notifications.unreadCount()" matBadgeColor="warn" matBadgeSize="small">
       notifications

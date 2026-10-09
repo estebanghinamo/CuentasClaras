@@ -71,7 +71,7 @@ export class WorkspaceCreatePage {
     this.workspaces.create(this.form.getRawValue()).subscribe({
       next: (workspace) => {
         this.context.setActive(workspace);
-        // TODO: navegar a /w/{id}/onboarding cuando exista M-20; por ahora entra
+        // Pendiente (M-20): navegar a /w/{id}/onboarding cuando exista; por ahora entra
         // directo al workspace recién creado (categorías, su "home"), salvo
         // "Gastos compartidos" que entra directo a su pantalla de Liquidación.
         if (workspace.type === 'shared_settlement') {
